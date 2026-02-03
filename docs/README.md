@@ -1,6 +1,6 @@
 # Dither & Etch
 
-![Dither & Etch](public/og-image.png)
+![Dither & Etch](../public/og-image.png)
 
 Bespoke laser engraving and custom commissions from British Columbia, Canada.
 
