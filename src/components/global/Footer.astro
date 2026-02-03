@@ -1,0 +1,137 @@
+---
+import Icon from './Icon.astro';
+import SocialIcon from './SocialIcon.astro';
+
+const currentYear = new Date().getFullYear();
+
+const socialLinks = [
+  {
+    href: 'https://www.instagram.com/ditherandetch/',
+    label: 'Visit us on Instagram',
+    icon: 'instagram' as const,
+  },
+  {
+    href: 'https://www.facebook.com/ditherandetch/',
+    label: 'Visit us on Facebook',
+    icon: 'facebook' as const,
+  },
+  {
+    href: 'mailto:hello@ditherandetch.ca',
+    label: 'Send us an email',
+    icon: 'mail' as const,
+  },
+];
+
+const quickLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/gallery', label: 'Gallery' },
+  { href: '/tools', label: 'Tools' },
+  { href: '/journal', label: 'Journal' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const legalLinks = [
+  { href: '/terms', label: 'Terms of Service' },
+  { href: '/privacy', label: 'Privacy Policy' },
+];
+---
+
+<footer class="border-t border-border bg-surface">
+  <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+      <!-- Brand -->
+      <div class="flex flex-col items-center text-center">
+        <span
+          class="font-display text-2xl leading-none uppercase tracking-wider text-ink-muted"
+        >
+          <a
+            href="/"
+            class="brand-lockup brand-link transition-colors hover:text-accent"
+            aria-label="Dither & Etch"
+          >
+            <span>Dither</span>
+            <span class="brand-lockup-ampersand">&</span>
+            <span>Etch</span>
+          </a>
+        </span>
+        <p class="mt-2 text-sm text-ink-muted">
+          Laser-crafted in British Columbia
+        </p>
+        <div class="mt-4 flex items-center justify-center gap-3">
+          {
+            socialLinks.map(link => (
+              <a
+                href={link.href}
+                target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+                rel={
+                  link.href.startsWith('mailto:') ?
+                    undefined
+                  : 'noopener noreferrer'
+                }
+                class="flex h-9 w-9 items-center justify-center rounded-xs text-ink-muted transition-all hover:bg-surface-raised hover:text-accent"
+                aria-label={link.label}
+              >
+                {link.icon === 'mail' ?
+                  <Icon name="mail" class="h-5 w-5" />
+                : <SocialIcon name={link.icon} class="h-5 w-5" />}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="flex flex-col items-center text-center">
+        <span
+          class="font-display text-2xl leading-none uppercase tracking-wider text-ink-muted"
+        >
+          Explore
+        </span>
+        <ul class="mt-3 flex list-none flex-col gap-2 p-0">
+          {
+            quickLinks.map(link => (
+              <li class="m-0 p-0">
+                <a
+                  href={link.href}
+                  class="inline-block min-h-[24px] py-1 text-sm text-ink-muted transition-colors hover:text-accent"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <!-- Legal Links -->
+      <div class="flex flex-col items-center text-center">
+        <span
+          class="font-display text-2xl leading-none uppercase tracking-wider text-ink-muted"
+        >
+          Legal
+        </span>
+        <ul class="mt-3 flex list-none flex-col gap-2 p-0">
+          {
+            legalLinks.map(link => (
+              <li class="m-0 p-0">
+                <a
+                  href={link.href}
+                  class="inline-block min-h-[24px] py-1 text-sm text-ink-muted transition-colors hover:text-accent"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="mt-10 border-t border-border pt-8 text-center">
+      <p class="text-sm text-ink-faint">
+        &copy; {currentYear} Dither & Etch. All pieces one-of-a-kind.
+      </p>
+    </div>
+  </div>
+</footer>

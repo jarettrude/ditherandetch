@@ -1,11 +1,256 @@
 ---
-import Welcome from '../components/Welcome.astro';
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Icon from '../components/global/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const allGalleryItems = await getCollection('gallery');
+const featuredItems = allGalleryItems.filter(item => item.data.featured);
+
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/gallery/*.{avif,jpg,jpeg,png,webp,gif}',
+  { eager: true },
+);
+
+const featuredWithImages = featuredItems
+  .map(item => {
+    const baseName = item.id.replace('.json', '');
+    const imageKey = Object.keys(imageModules).find(key => {
+      const parts = key.split('/');
+      const filename = parts[parts.length - 1];
+      const imageName = filename?.split('.')[0];
+      return imageName === baseName;
+    });
+    return {
+      ...item,
+      image: imageKey ? (imageModules[imageKey] as any)?.default : null,
+      size: item.data.size || 'small',
+    };
+  })
+  .filter(item => item.image);
+
+// Sort by order field, then by size for homepage
+featuredWithImages.sort((a, b) => {
+  const orderA = a.data.order ?? 50;
+  const orderB = b.data.order ?? 50;
+  if (orderA !== orderB) return orderA - orderB;
+
+  const sizeOrder = { large: 0, medium: 1, small: 2 };
+  return (
+    sizeOrder[a.size as keyof typeof sizeOrder]
+    - sizeOrder[b.size as keyof typeof sizeOrder]
+  );
+});
+
+// Grid classes based on size (6-column grid on homepage)
+function getGridClasses(size: string): string {
+  switch (size) {
+    case 'large':
+      return 'col-span-2 row-span-2 lg:col-span-3 lg:row-span-3';
+    case 'medium':
+      return 'col-span-2 row-span-2';
+    default:
+      return 'col-span-1 row-span-1';
+  }
+}
+
+function getImageWidth(size: string): number {
+  switch (size) {
+    case 'large':
+      return 800;
+    case 'medium':
+      return 600;
+    default:
+      return 400;
+  }
+}
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Dither & Etch — Custom Laser Creations">
+  <!-- Hero Section -->
+  <section
+    class="px-4 pt-16 pb-24 sm:px-6 lg:px-8 lg:pt-24 lg:pb-32 min-h-[40vh]"
+  >
+    <div class="mx-auto max-w-6xl">
+      <div class="max-w-3xl">
+        <h1
+          class="font-display text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl"
+        >
+          Custom creations.
+          <span class="block text-accent">No two alike.</span>
+        </h1>
+        <p
+          class="mt-6 max-w-xl text-lg text-ink-muted leading-relaxed sm:text-xl"
+        >
+          Custom commissions and one-of-a-kind pieces. Each one starts as a
+          conversation.
+        </p>
+        <div class="mt-10 flex flex-wrap gap-4">
+          <a
+            href="/gallery"
+            class="btn btn-primary btn-lg"
+            aria-label="View our work gallery"
+          >
+            view our work
+          </a>
+          <a
+            href="/contact"
+            class="btn btn-secondary btn-lg"
+            aria-label="Get in touch with us"
+          >
+            get in touch
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Work Bento Grid -->
+  {
+    featuredWithImages.length > 0 && (
+      <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-10 flex items-end justify-between">
+            <div>
+              <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+                Selected Work
+              </h2>
+              <p class="mt-2 text-ink-muted">
+                A few favorites from the collection.
+              </p>
+            </div>
+            <a
+              href="/gallery"
+              class="hidden text-sm font-medium text-accent hover:text-accent-hover sm:inline-flex sm:items-center sm:gap-1"
+              aria-label="View all work in the gallery"
+            >
+              view all work
+              <Icon name="arrow-right" class="h-4 w-4" />
+            </a>
+          </div>
+
+          {/* 6-Column Bento Grid: small=1×1, medium=2×2, large=3×3 */}
+          <div
+            class="grid auto-rows-fr grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 xl:grid-cols-6"
+            style="grid-auto-flow: dense;"
+          >
+            {featuredWithImages.slice(0, 9).map((item, index) => (
+              <a
+                href="/gallery"
+                aria-label={`View details for ${item.data.title || 'gallery item'}`}
+                class:list={[
+                  'group relative aspect-square overflow-hidden border border-border bg-surface-raised transition-all hover:border-accent/40',
+                  item.size === 'large' ? 'rounded-xs'
+                  : item.size === 'medium' ? 'rounded'
+                  : 'rounded-sm',
+                  getGridClasses(item.size),
+                ]}
+              >
+                <Image
+                  src={item.image!}
+                  alt={item.data.alt}
+                  widths={[200, 400, 600, 800, 1200, 1600]}
+                  width={getImageWidth(item.size)}
+                  height={getImageWidth(item.size)}
+                  sizes={
+                    item.size === 'large' ?
+                      '(max-width: 1023px) 100vw, (max-width: 1279px) 75vw, 50vw'
+                    : item.size === 'medium' ?
+                      '(max-width: 1023px) 100vw, (max-width: 1279px) 50vw, 33vw'
+                    : '(max-width: 1023px) 50vw, (max-width: 1279px) 25vw, 16vw'
+                  }
+                  class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading={index < 3 ? 'eager' : 'lazy'}
+                />
+              </a>
+            ))}
+          </div>
+
+          <div class="mt-8 text-center sm:hidden">
+            <a
+              href="/gallery"
+              class="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover"
+              aria-label="View all work in the gallery"
+            >
+              View all work
+              <Icon name="arrow-right" class="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- The Craft Section -->
+  <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-6xl">
+      <div class="mx-auto max-w-2xl text-center">
+        <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          The Name Means Something
+        </h2>
+        <div class="mt-8 space-y-6 text-lg text-ink-muted leading-relaxed">
+          <p>
+            <strong class="text-ink font-display">Dither</strong> — the halftone magic
+            that turns photos into thousands of tiny dots, each one placed with intention.
+          </p>
+          <p>
+            <strong class="text-ink font-display">Etch</strong> — the crisp, unforgiving
+            lines that demand precision. No room for error, no second chances.
+          </p>
+          <p class="text-ink">
+            Together, they're the yin and yang of laser craft. The organic and
+            the exact. The textured and the clean.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Intro/About Section -->
+  <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-6xl">
+      <div class="border border-border bg-surface-raised p-8 sm:p-12 lg:p-16">
+        <div class="mx-auto max-w-2xl text-center">
+          <h2
+            class="font-display text-3xl font-bold tracking-tight sm:text-4xl"
+          >
+            Every piece starts as a conversation
+          </h2>
+          <p class="mt-6 text-lg text-ink-muted leading-relaxed">
+            I specialize in custom commissions and one-of-a-kind creations. No
+            templates. No catalogs. Just collaboration — a sketch, an idea, a
+            "what if we tried..."
+          </p>
+          <p class="mt-4 text-lg text-ink-muted leading-relaxed">
+            Whether it's a custom board game, a wall piece, an LED lamp, or
+            something that doesn't exist yet — if you can imagine it, we can
+            probably make it happen.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-6xl">
+      <div class="text-center">
+        <h2 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Got an idea?
+        </h2>
+        <p class="mx-auto mt-4 max-w-lg text-lg text-ink-muted">
+          The best projects start with a simple message.
+        </p>
+        <div class="mt-8">
+          <a
+            href="mailto:hello@ditherandetch.ca"
+            class="btn btn-primary btn-lg"
+          >
+            hello@ditherandetch.ca
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 </Layout>

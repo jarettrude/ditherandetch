@@ -1,0 +1,318 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Privacy Policy | Dither & Etch"
+  description="Learn how Dither & Etch handles your privacy, data collection, and analytics preferences."
+>
+  <div class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <article class="prose mx-auto max-w-3xl">
+      <header class="not-prose mb-12">
+        <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+          Privacy Policy
+        </h1>
+        <p class="mt-4 text-ink-muted">Last updated: January 2026</p>
+      </header>
+
+      <section>
+        <h2>The Short Version</h2>
+        <p>
+          We respect your privacy. We use privacy-focused analytics that don't
+          track you personally, our tools process everything in your browser
+          (nothing gets uploaded), and we only collect personal information when
+          you voluntarily contact us.
+        </p>
+      </section>
+
+      <section>
+        <h2>Who We Are</h2>
+        <p>
+          Dither & Etch is a custom laser engraving service operated in British
+          Columbia, Canada. This policy covers how we handle information on our
+          website, ditherandetch.ca.
+        </p>
+        <p>
+          For questions about this policy, contact us at
+          <a href="mailto:hello@ditherandetch.ca">hello@ditherandetch.ca</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Information We Collect</h2>
+
+        <h3>Analytics Data</h3>
+        <p>
+          We use <a
+            href="https://umami.is"
+            target="_blank"
+            rel="noopener noreferrer">Umami</a
+          >, a privacy-focused, self-hosted analytics platform. Umami is
+          designed to be GDPR and PIPEDA compliant by default.
+        </p>
+        <p><strong>What Umami collects:</strong></p>
+        <ul>
+          <li>Page views and referrer URLs</li>
+          <li>Browser type and operating system</li>
+          <li>Device type (desktop, mobile, tablet)</li>
+          <li>Country (derived from anonymized IP)</li>
+          <li>Session duration and bounce rate</li>
+        </ul>
+        <p><strong>What Umami does NOT collect:</strong></p>
+        <ul>
+          <li>Personal information or identifiers</li>
+          <li>IP addresses (they're anonymized and not stored)</li>
+          <li>Cookies or persistent tracking</li>
+          <li>Cross-site tracking</li>
+          <li>Fingerprinting data</li>
+        </ul>
+        <p>
+          Umami generates a random visitor ID for each session that cannot be
+          used to identify you personally. This data helps us understand how
+          people use our site so we can improve it.
+        </p>
+        <p>
+          Our Umami instance is self-hosted, meaning your analytics data stays
+          on our infrastructure and is never shared with third parties.
+        </p>
+
+        <h3>Information You Provide</h3>
+        <p>
+          When you contact us via email about a commission, you voluntarily
+          provide information like:
+        </p>
+        <ul>
+          <li>Your name and email address</li>
+          <li>Project details and requirements</li>
+          <li>Images or reference materials</li>
+          <li>Shipping address (if applicable for a commission)</li>
+        </ul>
+        <p>
+          We use this information solely to discuss and complete your
+          commission. We don't sell, rent, or share your personal information
+          with third parties except as necessary to fulfill your order (e.g.,
+          shipping carriers).
+        </p>
+
+        <h3>Browser-Based Tools</h3>
+        <p>
+          Our free image processing tools (dithering, background removal, etc.)
+          run entirely in your browser using WebAssembly. <strong
+            >Your images are never uploaded to our servers.</strong
+          > All processing happens locally on your device.
+        </p>
+      </section>
+
+      <section>
+        <h2>How We Use Information</h2>
+        <ul>
+          <li>
+            <strong>Analytics:</strong> To understand site usage and improve the user
+            experience
+          </li>
+          <li>
+            <strong>Communications:</strong> To respond to inquiries and discuss commissions
+          </li>
+          <li>
+            <strong>Commissions:</strong> To create, deliver, and follow up on custom
+            work
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Your Choices</h2>
+
+        <h3>Analytics Opt-Out</h3>
+        <p>
+          You can opt out of analytics tracking at any time using the preference
+          controls below. Your choice is saved in your browser and respected on
+          all pages.
+        </p>
+
+        <div
+          class="not-prose my-8 rounded-sm border border-border bg-surface-raised p-6"
+        >
+          <h4 class="mb-4 font-display text-lg font-semibold">
+            Analytics Preferences
+          </h4>
+          <p class="mb-4 text-sm text-ink-muted">
+            Control whether we collect anonymous usage data to improve the site.
+          </p>
+          <div class="flex items-center gap-4">
+            <button
+              type="button"
+              id="analytics-toggle"
+              class="btn btn-secondary"
+              data-enabled="true"
+            >
+              Loading...
+            </button>
+            <span id="analytics-status" class="text-sm text-ink-muted"></span>
+          </div>
+        </div>
+
+        <h3>Do Not Track</h3>
+        <p>
+          We respect the Do Not Track (DNT) browser setting. If your browser
+          sends a DNT signal, Umami will not track your visit.
+        </p>
+
+        <h3>Email Communications</h3>
+        <p>
+          We only email you if you've contacted us first. We don't send
+          marketing emails or newsletters.
+        </p>
+      </section>
+
+      <section>
+        <h2>Data Retention</h2>
+        <ul>
+          <li>
+            <strong>Analytics:</strong> Aggregated, anonymized data is retained indefinitely
+            for trend analysis
+          </li>
+          <li>
+            <strong>Commission communications:</strong> Retained for business records
+            and to provide ongoing support
+          </li>
+          <li>
+            <strong>Project files:</strong> Retained for a reasonable period after
+            project completion in case of follow-up orders, then deleted
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Data Security</h2>
+        <p>
+          We take reasonable measures to protect information, including using
+          HTTPS encryption for all site traffic and secure email practices.
+          However, no internet transmission is 100% secure.
+        </p>
+      </section>
+
+      <section>
+        <h2>Third-Party Services</h2>
+        <p>
+          This site may contain links to external services (Instagram,
+          Facebook). Those services have their own privacy policies. We're not
+          responsible for their practices.
+        </p>
+        <p>
+          We don't use third-party advertising, social media tracking pixels, or
+          embedded content that tracks you.
+        </p>
+      </section>
+
+      <section>
+        <h2>Children's Privacy</h2>
+        <p>
+          This site is not directed at children under 13. We don't knowingly
+          collect information from children.
+        </p>
+      </section>
+
+      <section>
+        <h2>Your Rights (PIPEDA)</h2>
+        <p>
+          Under Canada's Personal Information Protection and Electronic
+          Documents Act (PIPEDA), you have the right to:
+        </p>
+        <ul>
+          <li>Access personal information we hold about you</li>
+          <li>Request correction of inaccurate information</li>
+          <li>Withdraw consent for data collection</li>
+          <li>File a complaint with the Privacy Commissioner of Canada</li>
+        </ul>
+        <p>
+          To exercise these rights, contact us at
+          <a href="mailto:hello@ditherandetch.ca">hello@ditherandetch.ca</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Changes to This Policy</h2>
+        <p>
+          We may update this policy occasionally. We'll update the "last
+          updated" date when changes are made. Continued use of the site after
+          changes constitutes acceptance.
+        </p>
+      </section>
+
+      <section>
+        <h2>Contact</h2>
+        <p>
+          Questions or concerns about privacy? Email us at
+          <a href="mailto:hello@ditherandetch.ca">hello@ditherandetch.ca</a>.
+        </p>
+      </section>
+    </article>
+  </div>
+</Layout>
+
+<script>
+  function initAnalyticsToggle() {
+    const toggle = document.getElementById(
+      'analytics-toggle',
+    ) as HTMLButtonElement;
+    const status = document.getElementById('analytics-status') as HTMLElement;
+
+    if (!toggle || !status) return;
+
+    const STORAGE_KEY = 'analytics-consent';
+    const UMAMI_DISABLED_KEY = 'umami.disabled';
+
+    function getConsent(): boolean {
+      // Check Umami's native disable flag first
+      const umamiDisabled = localStorage.getItem(UMAMI_DISABLED_KEY);
+      if (umamiDisabled === '1') return false;
+
+      const stored = localStorage.getItem(STORAGE_KEY);
+      // Default to true (opted in) if no preference stored
+      return stored === null ? true : stored === 'true';
+    }
+
+    function setConsent(enabled: boolean) {
+      localStorage.setItem(STORAGE_KEY, String(enabled));
+
+      // Sync with Umami's native disable flag
+      if (!enabled) {
+        localStorage.setItem(UMAMI_DISABLED_KEY, '1');
+      } else {
+        localStorage.removeItem(UMAMI_DISABLED_KEY);
+      }
+
+      updateUI(enabled);
+
+      // Dispatch event for the analytics script to respond to
+      window.dispatchEvent(
+        new CustomEvent('analytics-consent-change', {
+          detail: { enabled },
+        }),
+      );
+    }
+
+    function updateUI(enabled: boolean) {
+      toggle.textContent = enabled ? 'Opt Out' : 'Opt In';
+      toggle.dataset.enabled = String(enabled);
+      status.textContent =
+        enabled ?
+          'Analytics are currently enabled'
+        : 'Analytics are currently disabled';
+    }
+
+    // Initialize
+    const currentConsent = getConsent();
+    updateUI(currentConsent);
+
+    // Handle click
+    toggle.addEventListener('click', () => {
+      const currentlyEnabled = toggle.dataset.enabled === 'true';
+      setConsent(!currentlyEnabled);
+    });
+  }
+
+  initAnalyticsToggle();
+  document.addEventListener('astro:after-swap', initAnalyticsToggle);
+</script>

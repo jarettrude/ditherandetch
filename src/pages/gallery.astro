@@ -1,0 +1,339 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { Image } from 'astro:assets';
+import Icon from '../components/global/Icon.astro';
+import type { ImageMetadata } from 'astro';
+import { getCollection } from 'astro:content';
+
+const galleryEntries = await getCollection('gallery');
+const imageModules = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/gallery/*.{avif,jpg,jpeg,png,webp,gif}',
+  { eager: true },
+);
+
+type GalleryItem = {
+  image: ImageMetadata;
+  alt: string;
+  title: string;
+  caption?: string;
+  tags: string[];
+  slug: string;
+  featured: boolean;
+  size: 'small' | 'medium' | 'large';
+  order: number;
+};
+
+const items: GalleryItem[] = [];
+const allTags = new Set<string>();
+
+for (const entry of galleryEntries) {
+  const baseName = entry.id.replace('.json', '');
+  const imageKey = Object.keys(imageModules).find(key => {
+    const imageName = key.split('/').pop()?.split('.')[0];
+    return imageName === baseName;
+  });
+
+  if (!imageKey) continue;
+
+  const image = imageModules[imageKey]!.default;
+  entry.data.tags.forEach((tag: string) => allTags.add(tag));
+
+  items.push({
+    image,
+    alt: entry.data.alt,
+    title: entry.data.title,
+    caption: entry.data.caption || '',
+    tags: entry.data.tags,
+    slug: baseName,
+    featured: entry.data.featured || false,
+    size: entry.data.size || 'small',
+    order: entry.data.order ?? 50,
+  });
+}
+
+// Sort by order field (lower = earlier), then by size for grid packing
+items.sort((a, b) => {
+  // Primary: order field
+  if (a.order !== b.order) return a.order - b.order;
+
+  // Secondary: size (large first for better packing)
+  const sizeOrder = { large: 0, medium: 1, small: 2 };
+  return sizeOrder[a.size] - sizeOrder[b.size];
+});
+
+const sortedTags = Array.from(allTags).sort();
+const totalImages = items.length;
+
+// Grid classes based on size
+// 6-column grid: small=1×1, medium=2×2, large=3×3
+function getGridClasses(size: 'small' | 'medium' | 'large'): string {
+  switch (size) {
+    case 'large':
+      return 'col-span-2 row-span-2 lg:col-span-3 lg:row-span-3';
+    case 'medium':
+      return 'col-span-2 row-span-2';
+    case 'small':
+    default:
+      return 'col-span-1 row-span-1';
+  }
+}
+
+// Image width based on size for optimization
+function getImageWidth(size: 'small' | 'medium' | 'large'): number {
+  switch (size) {
+    case 'large':
+      return 900;
+    case 'medium':
+      return 600;
+    case 'small':
+      return 300;
+  }
+}
+---
+
+<Layout
+  title="The Work | Dither & Etch"
+  description="Custom commissions, personal projects, and experiments. Each piece tells its own story."
+>
+  <div class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-7xl">
+      <!-- Header -->
+      <header class="mb-12">
+        <h1
+          class="font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
+        >
+          The Work
+        </h1>
+        <p class="mt-4 max-w-xl text-lg text-ink-muted leading-relaxed">
+          Custom commissions, personal projects, and experiments. Each piece
+          tells its own story.
+        </p>
+      </header>
+
+      <!-- Filter Bar -->
+      {
+        sortedTags.length > 0 && (
+          <div class="mb-8 flex flex-wrap items-center gap-3">
+            <span class="text-sm text-ink-muted">Filter:</span>
+            <div class="flex flex-wrap gap-2" id="tag-filters">
+              {sortedTags.map(tag => (
+                <button
+                  type="button"
+                  data-tag={tag.toLowerCase()}
+                  class="tag-btn border border-border bg-surface-raised px-3 py-1.5 text-sm font-medium text-ink-muted transition-all hover:border-accent-hover hover:text-ink"
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              id="clear-filters"
+              class="ml-auto hidden text-sm text-accent hover:text-accent-hover"
+            >
+              Clear
+            </button>
+          </div>
+        )
+      }
+
+      <!-- Count -->
+      <div class="mb-8 flex items-center gap-2">
+        <span class="text-2xl font-bold" id="visible-count">{totalImages}</span>
+        <span class="text-ink-muted">pieces</span>
+      </div>
+
+      <!-- 6-Column Bento Grid: small=1×1, medium=2×2, large=3×3 -->
+      <div
+        id="gallery-grid"
+        class="grid auto-rows-fr grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 xl:grid-cols-6"
+        style="grid-auto-flow: dense;"
+      >
+        {
+          items.map((item, index) => (
+            <button
+              type="button"
+              class:list={[
+                'gallery-item group relative aspect-square overflow-hidden border border-border bg-surface-raised text-left transition-all hover:border-accent/40',
+                item.size === 'large' ? 'rounded-xs'
+                : item.size === 'medium' ? 'rounded'
+                : 'rounded-sm',
+                getGridClasses(item.size),
+              ]}
+              data-tags={item.tags
+                .map((t: string) => t.toLowerCase())
+                .join('|')}
+              data-title={item.title.toLowerCase()}
+              data-size={item.size}
+              data-lightbox-trigger
+              data-src={item.image.src}
+              data-alt={item.alt}
+              data-caption={item.title}
+              aria-label={`View full size image for ${item.title} - ${item.tags.join(', ')}`}
+            >
+              <Image
+                src={item.image}
+                alt={item.alt}
+                widths={[300, 600, 800, 1200]}
+                width={getImageWidth(item.size)}
+                height={getImageWidth(item.size)}
+                sizes={
+                  item.size === 'large' ?
+                    '(max-width: 1024px) 100vw, (max-width: 1280px) 75vw, 50vw'
+                  : item.size === 'medium' ?
+                    '(max-width: 1024px) 50vw, (max-width: 1280px) 50vw, 33vw'
+                  : '(max-width: 1024px) 50vw, (max-width: 1280px) 25vw, 16vw'
+                }
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                loading={index < 6 ? 'eager' : 'lazy'}
+              />
+              {item.tags.length > 0 && (
+                <div
+                  class:list={[
+                    'absolute inset-x-0 bottom-0 bg-linear-to-t from-surface/90 via-surface/50 to-transparent',
+                    item.size === 'large' ? 'p-3 pt-16'
+                    : item.size === 'medium' ? 'p-2.5 pt-12'
+                    : 'p-2 pt-8',
+                  ]}
+                >
+                  <div class="flex flex-wrap gap-1">
+                    {item.tags
+                      .slice(
+                        0,
+                        item.size === 'large' ? 3
+                        : item.size === 'medium' ? 2
+                        : 1,
+                      )
+                      .map((tag: string) => (
+                        <span
+                          class:list={[
+                            'bg-surface/80 text-ink-muted',
+                            item.size === 'large' ? 'px-2.5 py-1 text-sm'
+                            : item.size === 'medium' ? 'px-2 py-0.5 text-md'
+                            : 'px-1.5 py-1 text-sm',
+                          ]}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <dialog
+    id="lightbox"
+    class="fixed inset-0 z-50 m-0 h-full max-h-full w-full max-w-full bg-surface/95 p-0 backdrop:bg-transparent"
+  >
+    <div class="flex h-full w-full flex-col">
+      <header
+        class="flex items-center justify-between border-b border-border px-4 py-3 sm:px-6"
+      >
+        <p id="lightbox-caption" class="font-medium text-ink"></p>
+        <button
+          type="button"
+          id="lightbox-close"
+          class="flex h-10 w-10 items-center justify-center text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink"
+          aria-label="Close"
+        >
+          <Icon name="close" class="h-6 w-6" />
+        </button>
+      </header>
+      <div
+        class="flex flex-1 items-center justify-center overflow-auto p-4 sm:p-8"
+      >
+        <img
+          id="lightbox-img"
+          src=""
+          alt=""
+          class="max-h-full max-w-full rounded-sm object-contain"
+        />
+      </div>
+    </div>
+  </dialog>
+</Layout>
+
+<script>
+  function initGallery() {
+    const items = document.querySelectorAll('.gallery-item');
+    const tagButtons = document.querySelectorAll('.tag-btn');
+    const clearBtn = document.getElementById('clear-filters');
+    const visibleCount = document.getElementById('visible-count');
+
+    const lightbox = document.getElementById('lightbox') as HTMLDialogElement;
+    const lightboxImg = document.getElementById(
+      'lightbox-img',
+    ) as HTMLImageElement;
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const lightboxClose = document.getElementById('lightbox-close');
+
+    let activeTag: string | null = null;
+
+    function updateVisibility() {
+      let count = 0;
+      items.forEach(item => {
+        const el = item as HTMLElement;
+        const tags = el.dataset.tags?.split('|') || [];
+        const visible = !activeTag || tags.includes(activeTag);
+        el.style.display = visible ? '' : 'none';
+        if (visible) count++;
+      });
+      if (visibleCount) visibleCount.textContent = String(count);
+      if (clearBtn) clearBtn.classList.toggle('hidden', !activeTag);
+    }
+
+    function setActiveTag(tag: string | null) {
+      activeTag = tag;
+      tagButtons.forEach(btn => {
+        const btnTag = (btn as HTMLElement).dataset.tag;
+        const isActive = btnTag === activeTag;
+        btn.classList.toggle('border-accent', isActive);
+        btn.classList.toggle('bg-accent/10', isActive);
+        btn.classList.toggle('text-accent', isActive);
+        btn.classList.toggle('border-border', !isActive);
+        btn.classList.toggle('text-ink-muted', !isActive);
+      });
+      updateVisibility();
+    }
+
+    tagButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tag = (btn as HTMLElement).dataset.tag || null;
+        setActiveTag(activeTag === tag ? null : tag);
+      });
+    });
+
+    clearBtn?.addEventListener('click', () => setActiveTag(null));
+
+    // Lightbox
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        const el = item as HTMLElement;
+        const src = el.dataset.src;
+        const alt = el.dataset.alt || '';
+        const caption = el.dataset.caption || '';
+
+        if (src && lightboxImg && lightbox) {
+          lightboxImg.src = src;
+          lightboxImg.alt = alt;
+          if (lightboxCaption) lightboxCaption.textContent = caption;
+          lightbox.showModal();
+        }
+      });
+    });
+
+    lightboxClose?.addEventListener('click', () => lightbox?.close());
+    lightbox?.addEventListener('click', e => {
+      if (e.target === lightbox) lightbox.close();
+    });
+  }
+
+  initGallery();
+  document.addEventListener('astro:after-swap', initGallery);
+</script>

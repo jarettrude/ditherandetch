@@ -1,0 +1,84 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/global/Icon.astro';
+---
+
+<Layout
+  title="503 | Service Unavailable | Dither & Etch"
+  description="The workshop is temporarily closed. Please check back soon."
+  noindex
+>
+  <section class="container mx-auto px-4 py-16 md:py-24">
+    <div class="max-w-2xl mx-auto text-center">
+      <div class="mb-8">
+        <h1 class="text-6xl md:text-8xl font-bold text-accent mb-4">503</h1>
+        <div class="w-24 h-1 bg-accent mx-auto mb-8"></div>
+      </div>
+
+      <h2 class="text-2xl md:text-3xl font-semibold mb-4 font-bebas">
+        Workshop Under Maintenance
+      </h2>
+
+      <p class="text-lg md:text-xl text-ink-muted mb-12 leading-relaxed">
+        The laser is cooling down and we're tuning up the equipment. The
+        workshop will be back online shortly.
+      </p>
+
+      <div
+        class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
+      >
+        <button
+          onclick="window.location.reload()"
+          class="btn btn-primary"
+          aria-label="Refresh and Try Again"
+        >
+          <Icon name="refresh" class="w-5 h-5" />
+          Refresh and Try Again
+        </button>
+
+        <a
+          href="/"
+          class="btn btn-secondary"
+          aria-label="Back to Workshop - home page"
+        >
+          <Icon name="home" class="w-5 h-5" />
+          Back to Workshop
+        </a>
+      </div>
+
+      <div
+        class="bg-surface-raised border border-border rounded-lg p-6 mb-12 text-center"
+      >
+        <h3 class="text-lg font-semibold mb-3 font-display">
+          What's happening?
+        </h3>
+        <p class="text-ink-muted mb-4">
+          We're performing essential maintenance to keep our engraving precision
+          sharp. This usually takes just a few minutes.
+        </p>
+        <div
+          class="flex items-center justify-center gap-6 text-sm text-ink-faint"
+        >
+          <div class="flex items-center gap-2">
+            <Icon name="clock" class="w-4 h-4" />
+            <span>Temporary downtime</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <Icon name="tool" class="w-4 h-4" />
+            <span>Maintenance in progress</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 pt-8 border-t border-border">
+        <p class="text-sm text-ink-faint">
+          If the issue persists, please <a
+            href="mailto:hello@ditherandetch.ca"
+            class="text-accent hover:underline"
+            aria-label="contact us via email">contact us</a
+          >.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

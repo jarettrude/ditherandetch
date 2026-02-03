@@ -1,0 +1,18 @@
+---
+export interface Props {
+  name: 'instagram' | 'facebook';
+  class?: string;
+  size?: number | string;
+}
+
+const { name, class: className = '', size } = Astro.props;
+
+const sizeStyle =
+  size ?
+    `width: ${typeof size === 'number' ? size + 'px' : size}; height: ${typeof size === 'number' ? size + 'px' : size};`
+  : '';
+---
+
+<svg class:list={['icon', className]} style={sizeStyle} aria-hidden="true">
+  <use href={`#icon-${name}`}></use>
+</svg>

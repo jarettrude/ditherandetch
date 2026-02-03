@@ -1,0 +1,76 @@
+---
+import { getCollection, render } from 'astro:content';
+import Icon from '../../components/global/Icon.astro';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('journal', ({ data }) => !data.draft);
+  return posts.map(post => ({
+    params: { slug: post.id.replace('.md', '').replace('.mdx', '') },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Layout
+  title={`${post.data.title} | Dither & Etch`}
+  description={post.data.excerpt
+    || `${post.data.title} - A journal entry from Dither & Etch`}
+>
+  <article class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-3xl">
+      <!-- Header -->
+      <header class="mb-12">
+        <a
+          href="/journal"
+          class="inline-flex items-center gap-2 text-sm text-ink-muted hover:text-accent"
+        >
+          <Icon name="arrow-left" class="h-4 w-4" />
+          Back to Journal
+        </a>
+
+        <div class="mt-8">
+          <p class="text-sm font-medium uppercase tracking-wider text-accent">
+            {post.data.category}
+          </p>
+          <h1
+            class="mt-2 font-display text-4xl font-bold tracking-tight sm:text-5xl"
+          >
+            {post.data.title}
+          </h1>
+          <time
+            datetime={post.data.date.toISOString()}
+            class="mt-4 block text-ink-muted"
+          >
+            {
+              post.data.date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+            }
+          </time>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="journal-content max-w-none">
+        <Content />
+      </div>
+
+      <!-- Footer -->
+      <footer class="mt-16 border-t border-border pt-8">
+        <a
+          href="/journal"
+          class="inline-flex items-center gap-2 text-accent hover:text-accent-hover"
+        >
+          <Icon name="arrow-left" class="h-4 w-4" />
+          Back to Journal
+        </a>
+      </footer>
+    </div>
+  </article>
+</Layout>

@@ -1,0 +1,153 @@
+---
+import Icon from '../../components/global/Icon.astro';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Tools | Dither & Etch"
+  description="Free, client-side tools for preparing images for laser engraving. Your images never leave your browser."
+>
+  <div class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-4xl">
+      <header class="mb-12 text-center">
+        <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+          Tools
+        </h1>
+        <p class="mx-auto mt-4 max-w-2xl text-lg text-ink-muted">
+          Free, client-side tools for preparing images for laser engraving.
+          <strong class="text-ink">Your images never leave your browser.</strong
+          >
+        </p>
+      </header>
+
+      <div class="grid gap-6 sm:grid-cols-2">
+        <!-- Dither Tool (Featured - Full Width) -->
+        <a
+          href="/tools/dither"
+          class="group rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40 sm:col-span-2"
+        >
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xs bg-accent/10 text-accent"
+          >
+            <Icon name="image" class="h-6 w-6" />
+          </div>
+          <h2 class="font-display text-xl font-semibold">Dither Image</h2>
+          <p class="mt-2 text-sm text-ink-muted">
+            Convert photos to laser-ready dithered images. Choose from 10
+            presets optimized for different materials.
+          </p>
+          <div
+            class="mt-4 flex items-center gap-1 text-sm font-medium text-accent group-hover:text-accent-hover"
+          >
+            Open tool
+            <Icon name="arrow-right" class="h-4 w-4" />
+          </div>
+        </a>
+
+        <!-- Basic Editor -->
+        <a
+          href="/tools/editor"
+          class="group rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40"
+        >
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xs bg-accent/10 text-accent"
+          >
+            <Icon name="sliders" class="h-6 w-6" />
+          </div>
+          <h2 class="font-display text-xl font-semibold">Basic Editor</h2>
+          <p class="mt-2 text-sm text-ink-muted">
+            Adjust brightness, contrast, gamma, and sharpness before dithering.
+          </p>
+          <div
+            class="mt-4 flex items-center gap-1 text-sm font-medium text-accent group-hover:text-accent-hover"
+          >
+            Open tool
+            <Icon name="arrow-right" class="h-4 w-4" />
+          </div>
+        </a>
+
+        <!-- Background Removal -->
+        <a
+          href="/tools/background"
+          class="group rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40"
+        >
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xs bg-accent/10 text-accent"
+          >
+            <Icon name="scissors" class="h-6 w-6" />
+          </div>
+          <h2 class="font-display text-xl font-semibold">Background Remover</h2>
+          <p class="mt-2 text-sm text-ink-muted">
+            AI-powered background removal with high accuracy for fine details.
+          </p>
+          <div
+            class="mt-4 flex items-center gap-1 text-sm font-medium text-accent group-hover:text-accent-hover"
+          >
+            Open tool
+            <Icon name="arrow-right" class="h-4 w-4" />
+          </div>
+        </a>
+
+        <!-- Shape Masking -->
+        <a
+          href="/tools/masking"
+          class="group rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40"
+        >
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xs bg-accent/10 text-accent"
+          >
+            <Icon name="layout" class="h-6 w-6" />
+          </div>
+          <h2 class="font-display text-xl font-semibold">Shape Masking</h2>
+          <p class="mt-2 text-sm text-ink-muted">
+            Apply shape masks for creative laser engraving effects.
+          </p>
+          <div
+            class="mt-4 flex items-center gap-1 text-sm font-medium text-accent group-hover:text-accent-hover"
+          >
+            Open tool
+            <Icon name="arrow-right" class="h-4 w-4" />
+          </div>
+        </a>
+
+        <!-- Contour Maker -->
+        <a
+          href="/tools/contour"
+          class="group rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40"
+        >
+          <div
+            class="mb-4 flex h-12 w-12 items-center justify-center rounded-xs bg-accent/10 text-accent"
+          >
+            <Icon name="brush" class="h-6 w-6" />
+          </div>
+          <h2 class="font-display text-xl font-semibold">Contour Maker</h2>
+          <p class="mt-2 text-sm text-ink-muted">
+            Extract outlines and edges for laser cutting paths.
+          </p>
+          <div
+            class="mt-4 flex items-center gap-1 text-sm font-medium text-accent group-hover:text-accent-hover"
+          >
+            Open tool
+            <Icon name="arrow-right" class="h-4 w-4" />
+          </div>
+        </a>
+      </div>
+
+      <!-- Privacy Note -->
+      <div
+        class="mt-12 rounded-sm border border-border bg-surface-raised/50 p-6 text-center"
+      >
+        <div
+          class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xs bg-green-500/10 text-green-500"
+        >
+          <Icon name="shield-check" class="h-5 w-5" />
+        </div>
+        <h3 class="font-medium">100% Private</h3>
+        <p class="mt-1 text-sm text-ink-muted">
+          All processing happens in your browser using WebAssembly. Your images
+          are never uploaded to any server.
+        </p>
+      </div>
+    </div>
+  </div>
+</Layout>

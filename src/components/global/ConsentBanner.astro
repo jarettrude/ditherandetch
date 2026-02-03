@@ -1,0 +1,121 @@
+---
+/**
+ * Non-intrusive analytics consent banner for PIPEDA compliance.
+ *
+ * Since we use Umami (privacy-focused, no cookies), this is about transparency
+ * and giving users control, not cookie compliance per se.
+ *
+ * - Appears at bottom of screen, doesn't block scrolling
+ * - Remembers preference in localStorage
+ * - Can be managed on /privacy page
+ */
+---
+
+<div
+  id="consent-banner"
+  class="fixed inset-x-0 bottom-0 z-50 hidden translate-y-full transition-transform duration-300 ease-out"
+  role="region"
+  aria-label="Analytics consent"
+>
+  <div class="border-t border-border bg-surface/95 backdrop-blur-md">
+    <div
+      class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8"
+    >
+      <div class="flex-1">
+        <p class="text-sm text-ink">
+          We use privacy-focused analytics to understand how visitors use this
+          site.
+          <a
+            href="/privacy"
+            class="text-accent underline-offset-2 hover:text-accent-hover"
+            aria-label="Learn more about our privacy policy"
+          >
+            Learn more
+          </a>
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button
+          type="button"
+          id="consent-decline"
+          class="rounded-sm px-4 py-2 text-sm font-medium text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink"
+        >
+          Decline
+        </button>
+        <button
+          type="button"
+          id="consent-accept"
+          class="rounded-sm bg-accent px-4 py-2 text-sm font-medium text-surface transition-colors hover:bg-accent-hover"
+        >
+          Accept
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'analytics-consent';
+  const BANNER_SHOWN_KEY = 'consent-banner-shown';
+
+  function initConsentBanner() {
+    const banner = document.getElementById('consent-banner');
+    const acceptBtn = document.getElementById('consent-accept');
+    const declineBtn = document.getElementById('consent-decline');
+
+    if (!banner || !acceptBtn || !declineBtn) return;
+
+    // Check if user has already made a choice
+    const hasConsent = localStorage.getItem(STORAGE_KEY);
+    const bannerShown = localStorage.getItem(BANNER_SHOWN_KEY);
+
+    // Only show banner if no preference has been set
+    if (hasConsent === null && bannerShown !== 'true') {
+      // Small delay for better UX - let page load first
+      setTimeout(() => {
+        banner.classList.remove('hidden');
+        // Trigger animation
+        requestAnimationFrame(() => {
+          banner!.classList.remove('translate-y-full');
+        });
+      }, 1000);
+    }
+
+    function hideBanner() {
+      banner!.classList.add('translate-y-full');
+      setTimeout(() => {
+        banner!.classList.add('hidden');
+      }, 300);
+    }
+
+    function setConsent(enabled: boolean) {
+      localStorage.setItem(STORAGE_KEY, String(enabled));
+      localStorage.setItem(BANNER_SHOWN_KEY, 'true');
+      hideBanner();
+
+      // Dispatch event for analytics script
+      window.dispatchEvent(
+        new CustomEvent('analytics-consent-change', {
+          detail: { enabled },
+        }),
+      );
+
+      // If declining, disable Umami tracking
+      if (!enabled) {
+        // Umami respects localStorage disable flag
+        localStorage.setItem('umami.disabled', '1');
+      } else {
+        localStorage.removeItem('umami.disabled');
+      }
+    }
+
+    acceptBtn.addEventListener('click', () => setConsent(true));
+    declineBtn.addEventListener('click', () => setConsent(false));
+  }
+
+  // Initialize on page load
+  initConsentBanner();
+
+  // Re-initialize after Astro page transitions
+  document.addEventListener('astro:after-swap', initConsentBanner);
+</script>

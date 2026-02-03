@@ -1,0 +1,33 @@
+---
+import MaskingTool from '../../components/tools/MaskingTool.svelte';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Shape Masking | Dither & Etch"
+  description="Apply shape masks to images for creative laser engraving effects. 100% client-side processing."
+>
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <div class="mx-auto max-w-6xl">
+      <header class="mb-8">
+        <nav class="mb-4 text-sm" aria-label="Breadcrumb">
+          <a
+            href="/tools"
+            class="text-ink-muted underline underline-offset-2 hover:text-ink"
+            >Tools</a
+          >
+          <span class="mx-2 text-ink-muted">/</span>
+          <span class="text-ink">Shape Masking</span>
+        </nav>
+        <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Shape Masking
+        </h1>
+        <p class="mt-2 text-ink-muted">
+          Apply shape masks to images for creative laser engraving effects.
+        </p>
+      </header>
+
+      <MaskingTool client:only="svelte" />
+    </div>
+  </div>
+</Layout>

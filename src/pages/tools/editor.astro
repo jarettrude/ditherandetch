@@ -1,0 +1,33 @@
+---
+import EditorTool from '../../components/tools/EditorTool.svelte';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Basic Editor | Dither & Etch"
+  description="Adjust brightness, contrast, gamma, and sharpness. 100% client-side processing."
+>
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <div class="mx-auto max-w-6xl">
+      <header class="mb-8">
+        <nav class="mb-4 text-sm" aria-label="Breadcrumb">
+          <a
+            href="/tools"
+            class="text-ink-muted underline underline-offset-2 hover:text-ink"
+            >Tools</a
+          >
+          <span class="mx-2 text-ink-muted">/</span>
+          <span class="text-ink">Basic Editor</span>
+        </nav>
+        <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Basic Editor
+        </h1>
+        <p class="mt-2 text-ink-muted">
+          Adjust brightness, contrast, gamma, and sharpness before dithering.
+        </p>
+      </header>
+
+      <EditorTool client:only="svelte" />
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,33 @@
+---
+import ContourTool from '../../components/tools/ContourTool.svelte';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Contour Maker | Dither & Etch"
+  description="Extract outlines and edges for laser cutting paths. 100% client-side processing."
+>
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <div class="mx-auto max-w-6xl">
+      <header class="mb-8">
+        <nav class="mb-4 text-sm" aria-label="Breadcrumb">
+          <a
+            href="/tools"
+            class="text-ink-muted underline underline-offset-2 hover:text-ink"
+            >Tools</a
+          >
+          <span class="mx-2 text-ink-muted">/</span>
+          <span class="text-ink">Contour Maker</span>
+        </nav>
+        <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Contour Maker
+        </h1>
+        <p class="mt-2 text-ink-muted">
+          Extract outlines and edges from images for laser cutting paths.
+        </p>
+      </header>
+
+      <ContourTool client:only="svelte" />
+    </div>
+  </div>
+</Layout>

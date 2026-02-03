@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+const allPosts = await getCollection('journal', ({ data }) => !data.draft);
+const posts = allPosts.sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Layout
+  title="The Journal | Dither & Etch"
+  description="Behind the scenes at Dither & Etch. Process breakdowns, experiments, and stories from the workshop."
+>
+  <div class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-4xl">
+      <!-- Header -->
+      <header class="mb-12">
+        <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+          The Journal
+        </h1>
+        <p class="mt-4 max-w-xl text-lg text-ink-muted leading-relaxed">
+          Behind the scenes. Process notes. The occasional deep dive into how
+          things get made.
+        </p>
+      </header>
+
+      {
+        posts.length > 0 ?
+          <div class="grid gap-8">
+            {posts.map(post => (
+              <article class="group">
+                <a
+                  href={`/journal/${post.id.replace('.md', '').replace('.mdx', '')}`}
+                  class="block rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40 sm:p-8"
+                >
+                  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="flex-1">
+                      <p class="text-sm font-medium uppercase tracking-wider text-accent">
+                        {post.data.category}
+                      </p>
+                      <h2 class="mt-2 font-display text-2xl font-bold tracking-tight group-hover:text-accent sm:text-3xl">
+                        {post.data.title}
+                      </h2>
+                      {post.data.excerpt && (
+                        <p class="mt-3 text-ink-muted leading-relaxed">
+                          {post.data.excerpt}
+                        </p>
+                      )}
+                    </div>
+                    <time
+                      datetime={post.data.date.toISOString()}
+                      class="shrink-0 text-sm text-ink-muted"
+                    >
+                      {post.data.date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </time>
+                  </div>
+                </a>
+              </article>
+            ))}
+          </div>
+        : <div class="rounded-sm border border-border bg-surface-raised p-8 text-center sm:p-12">
+            <h2 class="font-display text-2xl font-bold">Coming Soon</h2>
+            <p class="mt-4 text-ink-muted">
+              I've got stories to tell — process breakdowns, experiments, and
+              lessons learned along the way. They're coming soon.
+            </p>
+            <p class="mt-6">
+              <a href="/gallery" class="text-accent hover:text-accent-hover">
+                Check out the gallery →
+              </a>
+            </p>
+          </div>
+      }
+    </div>
+  </div>
+</Layout>

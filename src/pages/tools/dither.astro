@@ -1,0 +1,34 @@
+---
+import DitherTool from '../../components/tools/DitherTool.svelte';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Dither Image | Dither & Etch"
+  description="Convert photos to laser-ready dithered images. 100% client-side processing — your images never leave your browser."
+>
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <div class="mx-auto max-w-6xl">
+      <header class="mb-8">
+        <nav class="mb-4 text-sm" aria-label="Breadcrumb">
+          <a
+            href="/tools"
+            class="text-ink-muted underline underline-offset-2 hover:text-ink"
+            >Tools</a
+          >
+          <span class="mx-2 text-ink-muted">/</span>
+          <span class="text-ink">Dither Image</span>
+        </nav>
+        <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Dither Image
+        </h1>
+        <p class="mt-2 text-ink-muted">
+          Convert photos to laser-ready dithered images with optimized presets
+          for different materials.
+        </p>
+      </header>
+
+      <DitherTool client:only="svelte" />
+    </div>
+  </div>
+</Layout>

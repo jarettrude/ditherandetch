@@ -1,0 +1,82 @@
+---
+import Icon from '../components/global/Icon.astro';
+import SocialIcon from '../components/global/SocialIcon.astro';
+import Layout from '../layouts/Layout.astro';
+
+const socialLinks = [
+  {
+    href: 'https://www.instagram.com/ditherandetch/',
+    label: 'Instagram',
+    icon: 'instagram' as const,
+  },
+  {
+    href: 'https://www.facebook.com/ditherandetch/',
+    label: 'Facebook',
+    icon: 'facebook' as const,
+  },
+];
+---
+
+<Layout
+  title="Contact | Dither & Etch"
+  description="Get in touch for custom laser engraving commissions. Based in British Columbia, Canada."
+>
+  <div class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+    <div class="mx-auto max-w-2xl">
+      <!-- Header -->
+      <header class="text-center">
+        <h1 class="font-display text-4xl font-bold tracking-tight sm:text-5xl">
+          Let's Make Something
+        </h1>
+        <p class="mt-6 text-lg text-ink-muted leading-relaxed">
+          If something here sparked an idea — or you've got a project you've
+          been thinking about — I'd love to hear about it.
+        </p>
+        <p class="mt-4 text-ink-muted">
+          Every project is different, so there's no price list or standard
+          quote. Just tell me what you're imagining and we'll figure out the
+          rest together.
+        </p>
+      </header>
+
+      <!-- Email CTA -->
+      <div class="mt-12 text-center">
+        <a href="mailto:hello@ditherandetch.ca" class="btn btn-primary btn-lg">
+          <Icon name="mail" class="h-6 w-6" />
+          hello@ditherandetch.ca
+        </a>
+      </div>
+
+      <!-- Location & Social -->
+      <div
+        class="mt-16 flex flex-col items-center gap-8 border-t border-border pt-12"
+      >
+        <div class="text-center">
+          <p
+            class="text-sm font-medium uppercase tracking-wider text-ink-muted"
+          >
+            Location
+          </p>
+          <p class="mt-2 text-ink">British Columbia, Canada</p>
+          <p class="text-ink-muted">Working with clients everywhere.</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          {
+            socialLinks.map(link => (
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex h-12 w-12 items-center justify-center rounded-xs border border-border bg-surface-raised text-ink-muted transition-all hover:border-accent/40 hover:text-accent"
+                aria-label={link.label}
+              >
+                <SocialIcon name={link.icon} class="h-5 w-5" />
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,80 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Matches multiple files with brace expansion notation
+# Set default charset
+[*.{js,jsx,ts,tsx,mjs,cjs}]
+indent_size = 2
+max_line_length = 80
+
+# CSS files
+[*.{css,scss,sass,less}]
+indent_size = 2
+
+# HTML files
+[*.html]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# Markdown files
+[*.md]
+indent_size = 2
+max_line_length = 120
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# Astro files
+[*.astro]
+indent_size = 2
+
+# Svelte files
+[*.svelte]
+indent_size = 2
+
+# Config files
+[*.{config.js,config.ts,config.mjs,config.cjs}]
+indent_size = 2
+
+# Package files
+[package.json]
+indent_size = 2
+
+# Lock files (should not be modified)
+[package-lock.json,pnpm-lock.yaml,yarn.lock]
+indent_style = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+# Git files (should not be modified)
+[.git/**]
+indent_style = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+# Node modules (should not be modified)
+[node_modules/**]
+indent_style = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+# Build artifacts (should not be modified)
+[dist/**,build/**,.astro/**]
+indent_style = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset

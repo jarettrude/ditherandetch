@@ -1,0 +1,140 @@
+{
+  "cSpell.words": [
+    "catan",
+    "ditherandetch",
+    "iconify",
+    "lightbox",
+    "pagefind",
+    // 2026 additions
+    "playwright",
+    "stylelint",
+    "tailwindcss",
+    "astro",
+    "svelte"
+  ],
+
+  // ESLint integration (2026 enhanced)
+  "eslint.enable": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "astro",
+    "svelte"
+  ],
+  "eslint.run": "onType",
+  "eslint.codeAction.showDisableComment": true,
+  "eslint.codeAction.showFixAll": true,
+  "eslint.format.enable": true,
+  "eslint.useFlatConfig": true,
+
+  // Prettier integration (2026 enhanced)
+  "prettier.enable": true,
+  "prettier.configPath": "./prettier.config.ts",
+  "prettier.documentSelectors": [
+    "**/*.astro",
+    "**/*.css",
+    "**/*.html",
+    "**/*.js",
+    "**/*.json",
+    "**/*.jsx",
+    "**/*.md",
+    "**/*.mjs",
+    "**/*.svelte",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "prettier.experimentalTernaries": true,
+
+  // Stylelint integration (2026 enhanced)
+  "stylelint.enable": true,
+  "stylelint.validate": ["css", "postcss", "scss", "astro", "svelte"],
+  "css.validate": false,
+  "stylelint.codeAction.showDisableComment": true,
+
+  // TypeScript settings (2026 enhanced)
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.experimental.tsserver.web.projectWideIntellisense": true,
+  "typescript.experimental.tsserver.declarations": true,
+
+  // Astro settings (2026 enhanced)
+  "astro.language-server": {
+    "astro": {
+      "typescript": "enabled",
+      "compiler": "enabled"
+    }
+  },
+
+  // Svelte settings (2026 enhanced)
+  "svelte.enable-ts-plugin": true,
+  "svelte.askToEnableTelemetry": false,
+
+  // File associations (2026 updated)
+  "files.associations": {
+    "*.astro": "astro",
+    "*.css": "tailwindcss",
+    "*.config.ts": "typescript",
+    "*.config.js": "javascript"
+  },
+
+  // Editor settings (2026 best practices)
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.quickSuggestions": {
+    "strings": true,
+    "comments": true
+  },
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true,
+  "editor.inlayHints.enabled": "on",
+  "editor.inlineSuggest.enabled": true,
+
+  // Git settings (2026 enhanced)
+  "git.enableSmartCommit": true,
+  "git.autofetch": true,
+  "git.enableCommitSigning": false,
+
+  // Testing settings (2026 enhanced)
+  "testing.automaticallyOpenPeekView": "failureInVisibleDocument",
+  "testing.followRunningTest": true,
+
+  // Accessibility settings (2026 enhanced)
+  "accessibility.hideAccessibleView": false,
+  "accessibility.signals.lineHasError": {
+    "sound": "on"
+  },
+  "accessibility.signals.lineHasWarning": {
+    "sound": "on"
+  },
+
+  // Linting on save (2026 enhanced)
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit",
+    "source.fixAll.stylelint": "explicit",
+    "source.fixAll.markdownlint": "explicit"
+  },
+
+  // 2026 additions for modern development
+  "emmet.includeLanguages": {
+    "astro": "html",
+    "svelte": "html"
+  },
+  "html.autoClosingTags": true,
+  "css.autoClosingTags": true,
+
+  // Performance settings for large projects
+  "editor.maxTokenizationLineLength": 20000,
+  "typescript.tsserver.maxTsServerMemory": 8192,
+
+  // Security settings
+  "security.workspace.trust.enabled": true,
+  "security.workspace.trust.untrustedFiles": "open"
+}

@@ -1,0 +1,33 @@
+---
+import BackgroundTool from '../../components/tools/BackgroundTool.svelte';
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout
+  title="Background Remover | Dither & Etch"
+  description="AI-powered background removal. 100% client-side processing."
+>
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <div class="mx-auto max-w-6xl">
+      <header class="mb-8">
+        <nav class="mb-4 text-sm" aria-label="Breadcrumb">
+          <a
+            href="/tools"
+            class="text-ink-muted underline underline-offset-2 hover:text-ink"
+            >Tools</a
+          >
+          <span class="mx-2 text-ink-muted">/</span>
+          <span class="text-ink">Background Remover</span>
+        </nav>
+        <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Background Remover
+        </h1>
+        <p class="mt-2 text-ink-muted">
+          AI-powered background removal with high accuracy for fine details.
+        </p>
+      </header>
+
+      <BackgroundTool client:only="svelte" />
+    </div>
+  </div>
+</Layout>
