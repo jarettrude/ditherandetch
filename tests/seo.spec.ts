@@ -44,7 +44,7 @@ const pages = [
   },
   {
     name: 'Tools Index',
-    path: '/tools/',
+    path: '/tools',
     expectedTitle: 'Tools | Dither & Etch',
   },
   {
@@ -74,7 +74,7 @@ const pages = [
   },
   {
     name: 'Journal Index',
-    path: '/journal/',
+    path: '/journal',
     expectedTitle: 'The Journal | Dither & Etch',
   },
 ];

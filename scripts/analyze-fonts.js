@@ -79,11 +79,11 @@ function analyzeFontUsage() {
 
   // Weight analysis
   const weightUsage = {
-    '300': 'font-light',
-    '400': 'font-normal',
-    '500': 'font-medium',
-    '600': 'font-semibold',
-    '700': 'font-bold'
+    300: 'font-light',
+    400: 'font-normal',
+    500: 'font-medium',
+    600: 'font-semibold',
+    700: 'font-bold',
   };
 
   console.log('🎯 Font Weight Usage:');
@@ -96,14 +96,16 @@ function analyzeFontUsage() {
         return false;
       }
     });
-    console.log(`   ${weight} (${className}): ${usage ? '✅ Used' : '❌ Not used'}`);
+    console.log(
+      `   ${weight} (${className}): ${usage ? '✅ Used' : '❌ Not used'}`,
+    );
   });
 
   return {
     totalChars,
     characters: sortedChars,
     filesAnalyzed: files.length,
-    weightUsage
+    weightUsage,
   };
 }
 

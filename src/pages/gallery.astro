@@ -206,6 +206,7 @@ function getImageWidth(size: 'small' | 'medium' | 'large'): number {
                       )
                       .map((tag: string) => (
                         <span
+                          aria-hidden="true"
                           class:list={[
                             'bg-surface/80 text-ink-muted',
                             item.size === 'large' ? 'px-2.5 py-1 text-sm'

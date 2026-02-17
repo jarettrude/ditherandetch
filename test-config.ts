@@ -32,13 +32,13 @@ export const testConfig = {
     { name: 'Gallery', path: '/gallery' },
     { name: 'Privacy', path: '/privacy' },
     { name: 'Terms', path: '/terms' },
-    { name: 'Tools Index', path: '/tools/' },
+    { name: 'Tools Index', path: '/tools' },
     { name: 'Background Tool', path: '/tools/background' },
     { name: 'Contour Tool', path: '/tools/contour' },
     { name: 'Dither Tool', path: '/tools/dither' },
     { name: 'Editor Tool', path: '/tools/editor' },
     { name: 'Masking Tool', path: '/tools/masking' },
-    { name: 'Journal Index', path: '/journal/' },
+    { name: 'Journal Index', path: '/journal' },
   ],
 
   // Test thresholds (2026 Standards)

@@ -9,6 +9,10 @@ import svelte from '@astrojs/svelte';
 export default defineConfig({
   output: 'static',
   site: 'https://ditherandetch.ca',
+  trailingSlash: 'never',
+  build: {
+    format: 'file',
+  },
   integrations: [sitemap(), svelte()],
   vite: {
     plugins: [tailwindcss()],

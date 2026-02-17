@@ -8,7 +8,8 @@ const navItems = [
   { href: '/journal', label: 'Journal' },
 ];
 
-const currentPath = Astro.url.pathname;
+const { url } = Astro;
+const currentPath = url.pathname;
 ---
 
 <header

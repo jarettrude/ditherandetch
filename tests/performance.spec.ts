@@ -19,13 +19,13 @@ const pages = [
   { name: 'Gallery', path: '/gallery' },
   { name: 'Privacy Policy', path: '/privacy' },
   { name: 'Terms of Service', path: '/terms' },
-  { name: 'Tools Index', path: '/tools/' },
+  { name: 'Tools Index', path: '/tools' },
   { name: 'Background Tool', path: '/tools/background' },
   { name: 'Contour Tool', path: '/tools/contour' },
   { name: 'Dither Tool', path: '/tools/dither' },
   { name: 'Editor Tool', path: '/tools/editor' },
   { name: 'Masking Tool', path: '/tools/masking' },
-  { name: 'Journal Index', path: '/journal/' },
+  { name: 'Journal Index', path: '/journal' },
 ];
 
 // Performance thresholds based on Core Web Vitals
@@ -101,7 +101,7 @@ test.describe('Performance Tests', () => {
         preconnects.length > 0 || dnsPrefetchs.length > 0;
 
       // Not required for all pages, but good for performance if external assets are used
-      if (pageInfo.path === '/' || pageInfo.path.includes('/tools/')) {
+      if (pageInfo.path === '/' || pageInfo.path.includes('/tools')) {
         // Relax: only warn or skip if no external domains are found
         const hasExternalResources = await page.evaluate(() => {
           const externalOrigins = new Set();

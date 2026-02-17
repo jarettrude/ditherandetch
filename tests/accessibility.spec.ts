@@ -20,13 +20,13 @@ const pages = [
   { name: 'Gallery', path: '/gallery' },
   { name: 'Privacy Policy', path: '/privacy' },
   { name: 'Terms of Service', path: '/terms' },
-  { name: 'Tools Index', path: '/tools/' },
+  { name: 'Tools Index', path: '/tools' },
   { name: 'Background Tool', path: '/tools/background' },
   { name: 'Contour Tool', path: '/tools/contour' },
   { name: 'Dither Tool', path: '/tools/dither' },
   { name: 'Editor Tool', path: '/tools/editor' },
   { name: 'Masking Tool', path: '/tools/masking' },
-  { name: 'Journal Index', path: '/journal/' },
+  { name: 'Journal Index', path: '/journal' },
 ];
 
 // Helper to format violation details for better error messages

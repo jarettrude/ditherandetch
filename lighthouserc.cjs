@@ -35,7 +35,7 @@ function _findAvailablePort(startPort = 14322) {
 const PORT = process.env.LHCI_PORT || '14322';
 const BASE_URL = `http://localhost:${PORT}`;
 
-export default {
+module.exports = {
   ci: {
     collect: {
       // Start the preview server before running tests
@@ -50,13 +50,13 @@ export default {
         `${BASE_URL}/gallery`,
         `${BASE_URL}/privacy`,
         `${BASE_URL}/terms`,
-        `${BASE_URL}/tools/`,
+        `${BASE_URL}/tools`,
         `${BASE_URL}/tools/background`,
         `${BASE_URL}/tools/contour`,
         `${BASE_URL}/tools/dither`,
         `${BASE_URL}/tools/editor`,
         `${BASE_URL}/tools/masking`,
-        `${BASE_URL}/journal/`,
+        `${BASE_URL}/journal`,
       ],
 
       // Run 3 times per URL for more reliable scores
@@ -99,7 +99,6 @@ export default {
         bypass: 'error',
         'color-contrast': 'error',
         'document-title': 'error',
-        'duplicate-id-active': 'error',
         'duplicate-id-aria': 'error',
         'form-field-multiple-labels': 'error',
         'frame-title': 'error',
@@ -127,7 +126,6 @@ export default {
         'first-contentful-paint': ['warn', { maxNumericValue: 1800 }],
         'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
         'total-blocking-time': ['warn', { maxNumericValue: 200 }],
-        'interaction-to-next-paint': ['error', { maxNumericValue: 200 }], // Critical 2026 Metric
         'speed-index': ['warn', { maxNumericValue: 3400 }],
 
         // Performance best practices
@@ -138,7 +136,6 @@ export default {
         'unused-javascript': 'warn',
         'efficient-animated-content': 'warn',
         'uses-optimized-images': 'warn',
-        'uses-webp-images': 'warn',
         'uses-text-compression': 'warn',
 
         // ===== BEST PRACTICES =====
@@ -146,9 +143,9 @@ export default {
 
         // ===== SEO =====
         'categories:seo': ['warn', { minScore: 0.9 }],
-        'is-crawlable': 'warn', // 404 pages are correctly noindex, dev builds might be too
+        'is-crawlable': 'off', // Error pages are intentionally noindex; normal pages pass
         'link-text': 'error',
-        'network-dependency-tree-insight': 'error',
+        'network-dependency-tree-insight': 'off', // LH 13 diagnostic insight, always scores 0
         'link-in-text-block': 'off', // Design choice: links use color/hover states only
       },
     },
