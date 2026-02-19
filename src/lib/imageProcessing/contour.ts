@@ -18,10 +18,8 @@ export function extractContours(
   const { width, height, data } = imageData;
   const result = new Uint8ClampedArray(data.length);
 
-  // Fill with white
   result.fill(255);
 
-  // Convert to grayscale and threshold
   const binary = new Uint8Array(width * height);
   for (let i = 0; i < width * height; i++) {
     const idx = i * 4;
@@ -29,13 +27,11 @@ export function extractContours(
     binary[i] = gray < threshold ? 1 : 0;
   }
 
-  // Find edges (pixels that are black with at least one white neighbor)
   for (let y = 1; y < height - 1; y++) {
     for (let x = 1; x < width - 1; x++) {
       const idx = y * width + x;
 
       if (binary[idx] === 1) {
-        // Check 4-connected neighbors
         const hasWhiteNeighbor =
           binary[idx - 1] === 0
           || binary[idx + 1] === 0
@@ -75,7 +71,6 @@ export function contourToSVG(
   const minPathLength = options?.minPathLength ?? 0;
   const offsetPx = options?.offsetPx ?? 0;
 
-  // Convert to binary
   const binary = new Uint8Array(width * height);
   for (let i = 0; i < width * height; i++) {
     const idx = i * 4;
@@ -394,7 +389,6 @@ export function simplifyPath(
 ): { x: number; y: number }[] {
   if (points.length < 3) return points;
 
-  // Find point with maximum distance from line between first and last
   let maxDist = 0;
   let maxIdx = 0;
 
@@ -456,7 +450,6 @@ export function dilateContour(
     for (let x = 0; x < width; x++) {
       const idx = (y * width + x) * 4;
 
-      // Check if any pixel in radius is black
       let hasBlack = false;
       for (let dy = -radius; dy <= radius && !hasBlack; dy++) {
         for (let dx = -radius; dx <= radius && !hasBlack; dx++) {
@@ -498,7 +491,6 @@ export function erodeContour(
     for (let x = 0; x < width; x++) {
       const idx = (y * width + x) * 4;
 
-      // Only keep black if all pixels in radius are black
       let allBlack = true;
       for (let dy = -radius; dy <= radius && allBlack; dy++) {
         for (let dx = -radius; dx <= radius && allBlack; dx++) {
@@ -537,14 +529,12 @@ export function cannyEdgeDetection(
 ): ProcessingImageData {
   const { width, height, data } = imageData;
 
-  // Convert to grayscale
   const gray = new Float32Array(width * height);
   for (let i = 0; i < width * height; i++) {
     const idx = i * 4;
     gray[i]! = getGrayOnWhite(data, idx);
   }
 
-  // Apply Gaussian blur (3x3 kernel)
   const blurred = new Float32Array(width * height);
   const kernel = [1, 2, 1, 2, 4, 2, 1, 2, 1];
   const kernelSum = 16;
@@ -562,7 +552,6 @@ export function cannyEdgeDetection(
     }
   }
 
-  // Compute gradients using Sobel operators
   const magnitude = new Float32Array(width * height);
   const direction = new Float32Array(width * height);
 
@@ -570,7 +559,6 @@ export function cannyEdgeDetection(
     for (let x = 1; x < width - 1; x++) {
       const idx = y * width + x;
 
-      // Sobel X
       const gx =
         -blurred[(y - 1) * width + (x - 1)]!
         + blurred[(y - 1) * width + (x + 1)]!
@@ -579,7 +567,6 @@ export function cannyEdgeDetection(
         + -blurred[(y + 1) * width + (x - 1)]!
         + blurred[(y + 1) * width + (x + 1)]!;
 
-      // Sobel Y
       const gy =
         -blurred[(y - 1) * width + (x - 1)]!
         - 2 * blurred[(y - 1) * width + x]!
@@ -593,7 +580,6 @@ export function cannyEdgeDetection(
     }
   }
 
-  // Non-maximum suppression
   const suppressed = new Float32Array(width * height);
 
   for (let y = 1; y < height - 1; y++) {
@@ -626,7 +612,6 @@ export function cannyEdgeDetection(
     }
   }
 
-  // Double threshold and hysteresis
   const edgesOutput = new Uint8Array(width * height);
 
   for (let y = 0; y < height; y++) {
@@ -640,7 +625,6 @@ export function cannyEdgeDetection(
     }
   }
 
-  // Hysteresis
   let changed = true;
   while (changed) {
     changed = false;
@@ -663,7 +647,6 @@ export function cannyEdgeDetection(
     }
   }
 
-  // Create output
   const result = new Uint8ClampedArray(width * height * 4);
   result.fill(255);
 

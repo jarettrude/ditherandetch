@@ -1,6 +1,6 @@
 {
   "title": "ASL Letter Matching Game",
-  "alt": "A matching game for ASL letters. ASL representations for each letter is engraved on a token to be matched onto the game board.",
+  "alt": "ASL letter matching game with engraved tokens for each letter.",
   "caption": "ASL Letter Matching Game",
   "tags": ["games", "personalized"],
   "featured": true,

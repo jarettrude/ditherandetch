@@ -7,9 +7,9 @@
  * 100% client-side processing — your images never leave your browser.
  */
 
-import type { ProcessingImageData } from './types';
 import * as adjustments from './adjustments';
 import * as dithering from './dithering';
+import type { ProcessingImageData } from './types';
 
 export interface PresetConfig {
   id: string;
@@ -220,21 +220,17 @@ export function applyPreset(
   };
   const adj = preset.adjustments;
 
-  // Convert to grayscale first
   result = adjustments.toGrayscale(result);
 
-  // Special handling for sketch preset
   if (presetName === 'pencilSketch') {
     result = adjustments.sketchEffect(result);
     return dithering.ditheringAlgorithms[preset.ditheringAlgorithm](result);
   }
 
-  // Apply auto adjustment if enabled
   if (adj.autoAdjust) {
     result = adjustments.autoAdjust(result);
   }
 
-  // Apply color correction if enabled
   if (adj.colorCorrection) {
     result = adjustments.colorCorrection(
       result,
@@ -243,32 +239,26 @@ export function applyPreset(
     );
   }
 
-  // Apply denoise if specified
   if (adj.denoise && adj.denoise > 0) {
     result = adjustments.denoise(result, adj.denoise);
   }
 
-  // Apply gamma adjustment
   if (adj.gamma && adj.gamma !== 1.0) {
     result = adjustments.adjustGamma(result, adj.gamma);
   }
 
-  // Apply brightness adjustment
   if (adj.brightness && adj.brightness !== 0) {
     result = adjustments.adjustBrightness(result, adj.brightness);
   }
 
-  // Apply contrast adjustment
   if (adj.contrast && adj.contrast !== 0) {
     result = adjustments.adjustContrast(result, adj.contrast);
   }
 
-  // Apply edge enhancement
   if (adj.edgeEnhance && adj.edgeEnhance > 0) {
     result = adjustments.edgeEnhance(result, adj.edgeEnhance);
   }
 
-  // Apply sharpening
   if (adj.sharpenAmount && adj.sharpenAmount > 0) {
     result = adjustments.unsharpMask(
       result,
@@ -277,7 +267,6 @@ export function applyPreset(
     );
   }
 
-  // Apply dithering
   result = dithering.ditheringAlgorithms[preset.ditheringAlgorithm](result);
 
   return result;

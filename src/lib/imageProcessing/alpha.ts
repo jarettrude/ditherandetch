@@ -1,3 +1,7 @@
+/**
+ * Calculate grayscale value with white background compositing
+ * Handles transparency by compositing against white background
+ */
 export function getGrayOnWhite(data: Uint8ClampedArray, idx: number): number {
   const a = data[idx + 3]!;
   if (a === 0) return 255;
@@ -13,6 +17,10 @@ export function getGrayOnWhite(data: Uint8ClampedArray, idx: number): number {
   return 0.299 * data[idx]! + 0.587 * data[idx + 1]! + 0.114 * data[idx + 2]!;
 }
 
+/**
+ * Sanitize RGBA data for export by compositing transparency against white
+ * Ensures transparent areas appear white when exported
+ */
 export function sanitizeRgbaForExport(
   data: Uint8ClampedArray,
 ): Uint8ClampedArray<ArrayBuffer> {

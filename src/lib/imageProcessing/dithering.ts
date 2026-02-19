@@ -7,7 +7,6 @@
 
 import type { ProcessingImageData } from './types';
 
-// Helper to get grayscale value from pixel
 function getGray(data: Uint8ClampedArray, idx: number): number {
   const a = data[idx + 3]!;
   if (a === 0) {
@@ -25,7 +24,6 @@ function getGray(data: Uint8ClampedArray, idx: number): number {
   return 0.299 * data[idx]! + 0.587 * data[idx + 1]! + 0.114 * data[idx + 2]!;
 }
 
-// Helper to set pixel to black or white
 function setPixel(data: Uint8ClampedArray, idx: number, value: number): void {
   data[idx] = value;
   data[idx + 1] = value;
@@ -47,7 +45,6 @@ export function floydSteinberg(
   const result = new Uint8ClampedArray(data);
   const errors = new Float32Array(width * height);
 
-  // Initialize with grayscale values
   for (let i = 0; i < width * height; i++) {
     errors[i] = getGray(data, i * 4);
   }
@@ -60,9 +57,8 @@ export function floydSteinberg(
       const quantError = oldPixel - newPixel;
 
       setPixel(result, idx * 4, newPixel);
-      result[idx * 4 + 3] = data[idx * 4 + 3]!; // Preserve alpha
+      result[idx * 4 + 3] = data[idx * 4 + 3]!;
 
-      // Distribute error to neighbors
       if (x + 1 < width) {
         errors[idx + 1]! += (quantError * 7) / 16;
       }
@@ -215,7 +211,6 @@ export function atkinson(imageData: ProcessingImageData): ProcessingImageData {
       setPixel(result, idx * 4, newPixel);
       result[idx * 4 + 3] = data[idx * 4 + 3]!;
 
-      // Distribute 6/8 of error (intentionally loses 2/8)
       if (x + 1 < width) errors[idx + 1]! += (quantError * 1) / 8;
       if (x + 2 < width) errors[idx + 2]! += (quantError * 1) / 8;
       if (y + 1 < height) {
@@ -389,7 +384,6 @@ export function bayerOrdered(
   const { width, height, data } = imageData;
   const result = new Uint8ClampedArray(data);
 
-  // 8x8 Bayer matrix normalized to 0-255 range
   const bayerMatrix = [
     [0, 128, 32, 160, 8, 136, 40, 168],
     [192, 64, 224, 96, 200, 72, 232, 104],

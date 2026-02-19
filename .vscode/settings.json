@@ -1,16 +1,30 @@
 {
   "cSpell.words": [
-    "catan",
-    "ditherandetch",
-    "iconify",
-    "lightbox",
-    "pagefind",
-    // 2026 additions
-    "playwright",
-    "stylelint",
-    "tailwindcss",
     "astro",
-    "svelte"
+    "Bento",
+    "briaai",
+    "Cardstock",
+    "catan",
+    "chaikin",
+    "Denoise",
+    "Denoises",
+    "ditherandetch",
+    "huggingface",
+    "iconify",
+    "isnet",
+    "lightbox",
+    "Ninke",
+    "pagefind",
+    "Peucker",
+    "playwright",
+    "pretrained",
+    "RMBG",
+    "Steinberg",
+    "stucki",
+    "stylelint",
+    "svelte",
+    "tailwindcss",
+    "unsharp"
   ],
 
   // ESLint integration (2026 enhanced)

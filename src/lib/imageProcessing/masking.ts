@@ -252,7 +252,6 @@ export function applyMask(
 
   const scale = maskPosition.scale || 1;
 
-  // Treat x/y as translation of the mask center (in image pixels)
   const centerX = width / 2 + maskPosition.x;
   const centerY = height / 2 + maskPosition.y;
   const maskCenterX = maskData.width / 2;
@@ -275,10 +274,9 @@ export function applyMask(
         && maskY < maskData.height
       ) {
         const maskIdx = (maskY * maskData.width + maskX) * 4;
-        maskValue = maskData.data[maskIdx]!; // Use red channel as mask value
+        maskValue = maskData.data[maskIdx]!;
       }
 
-      // Apply mask
       result[idx] = data[idx]!;
       result[idx + 1] = data[idx + 1]!;
       result[idx + 2] = data[idx + 2]!;
@@ -303,7 +301,6 @@ export async function createMaskFromImage(imageBlob: Blob): Promise<ImageData> {
   ctx.drawImage(img, 0, 0);
   const imageData = ctx.getImageData(0, 0, img.width, img.height);
 
-  // Convert to grayscale mask
   for (let i = 0; i < imageData.data.length; i += 4) {
     const gray = Math.round(getGrayOnWhite(imageData.data, i));
     imageData.data[i]! = gray;
@@ -345,20 +342,16 @@ export function applyShapeMask(
   const { width, height } = imageData;
   const { feather = 0, invert = false } = options;
 
-  // Generate the shape mask
   let maskData = generateShapeMask(shapeId, width, height);
 
-  // Invert if requested
   if (invert) {
     maskData = invertMask(maskData);
   }
 
-  // Apply feathering if requested
   if (feather > 0) {
     maskData = featherMaskEdges(maskData, feather);
   }
 
-  // Apply mask to image
   const result = new ImageData(
     new Uint8ClampedArray(imageData.data),
     width,
@@ -366,7 +359,7 @@ export function applyShapeMask(
   );
 
   for (let i = 0; i < imageData.data.length; i += 4) {
-    const maskValue = maskData.data[i]!; // Use red channel
+    const maskValue = maskData.data[i]!;
     result.data[i + 3] = Math.round((imageData.data[i + 3]! * maskValue) / 255);
   }
 
@@ -384,7 +377,6 @@ function featherMaskEdges(maskData: ImageData, radius: number): ImageData {
     height,
   );
 
-  // Simple box blur for feathering
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let sum = 0;

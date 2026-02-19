@@ -15,7 +15,6 @@ import {
   env,
 } from '@huggingface/transformers';
 
-// Configure transformers.js for browser usage
 env.allowLocalModels = false;
 
 export interface BackgroundRemovalOptions {
@@ -65,7 +64,6 @@ export async function removeImageBackground(
     options.onProgress,
   );
 
-  // Convert blob to data URL if needed
   let imageUrl: string;
   if (imageSource instanceof Blob) {
     imageUrl = await new Promise<string>(resolve => {
@@ -77,14 +75,12 @@ export async function removeImageBackground(
     imageUrl = imageSource;
   }
 
-  // Load image using standard Image element to get proper RGBA data
   const htmlImage = new Image();
   htmlImage.src = imageUrl;
   await new Promise(resolve => {
     htmlImage.onload = resolve;
   });
 
-  // Get original image data via canvas (guaranteed RGBA format)
   const origCanvas = document.createElement('canvas');
   origCanvas.width = htmlImage.width;
   origCanvas.height = htmlImage.height;
@@ -97,38 +93,31 @@ export async function removeImageBackground(
     htmlImage.height,
   );
 
-  // Load image for model processing
   const image = await RawImage.fromURL(imageUrl);
   const { pixel_values } = await segProcessor(image);
 
-  // Run model
   const { output } = await segModel({ input: pixel_values });
 
-  // Post-process mask - resize to original image dimensions
   const maskRaw = await RawImage.fromTensor(
     output[0].mul(255).to('uint8'),
   ).resize(htmlImage.width, htmlImage.height);
 
-  // Create output with transparency
   const canvas = document.createElement('canvas');
   canvas.width = htmlImage.width;
   canvas.height = htmlImage.height;
   const ctx = canvas.getContext('2d')!;
 
-  // Apply mask to original image data
   const imgData = ctx.createImageData(htmlImage.width, htmlImage.height);
   const maskChannels = maskRaw.channels;
 
   for (let i = 0; i < htmlImage.width * htmlImage.height; i++) {
     const idx = i * 4;
-    // Copy RGB from original image
-    imgData.data[idx] = originalImageData.data[idx]!; // R
-    imgData.data[idx + 1] = originalImageData.data[idx + 1]!; // G
-    imgData.data[idx + 2] = originalImageData.data[idx + 2]!; // B
-    // Get mask value - handle different channel counts
+    imgData.data[idx] = originalImageData.data[idx]!;
+    imgData.data[idx + 1] = originalImageData.data[idx + 1]!;
+    imgData.data[idx + 2] = originalImageData.data[idx + 2]!;
     const maskValue =
       maskChannels === 1 ? maskRaw.data[i]! : maskRaw.data[i * maskChannels]!;
-    imgData.data[idx + 3] = maskValue; // A from mask
+    imgData.data[idx + 3] = maskValue;
   }
 
   ctx.putImageData(imgData, 0, 0);
@@ -161,7 +150,6 @@ export async function getBackgroundMask(
     imageUrl = imageSource;
   }
 
-  // Load image to get dimensions
   const htmlImage = new Image();
   htmlImage.src = imageUrl;
   await new Promise(resolve => {
@@ -185,7 +173,6 @@ export async function getBackgroundMask(
   const imgData = ctx.createImageData(htmlImage.width, htmlImage.height);
   for (let i = 0; i < htmlImage.width * htmlImage.height; i++) {
     const idx = i * 4;
-    // Get mask value - handle different channel counts
     const value =
       maskChannels === 1 ? maskData.data[i]! : maskData.data[i * maskChannels]!;
     imgData.data[idx] = value;
@@ -217,10 +204,8 @@ export function applyMaskToImage(
   );
 
   for (let i = 0; i < imageData.data.length; i += 4) {
-    // Get mask value (grayscale)
     const maskValue = maskData.data[i]!;
 
-    // Apply mask to alpha channel
     const alpha = invert ? 255 - maskValue : maskValue;
     result.data[i + 3] = Math.min(result.data[i + 3]!, alpha);
   }
@@ -237,7 +222,7 @@ export function refineMask(
   x: number,
   y: number,
   radius: number,
-  value: number, // 0 = remove, 255 = keep
+  value: number,
 ): ImageData {
   const result = new ImageData(
     new Uint8ClampedArray(maskData.data),
@@ -256,7 +241,6 @@ export function refineMask(
         if (px >= 0 && px < maskData.width && py >= 0 && py < maskData.height) {
           const idx = (py * maskData.width + px) * 4;
 
-          // Soft brush falloff
           const distance = Math.sqrt(dx * dx + dy * dy);
           const falloff = 1 - distance / radius;
           const blendValue = Math.round(
@@ -287,7 +271,6 @@ export function featherMask(maskData: ImageData, radius: number): ImageData {
 
   const { width, height } = maskData;
 
-  // Simple box blur for feathering
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let sum = 0;

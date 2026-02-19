@@ -136,9 +136,7 @@ function getImageWidth(size: string): number {
             style="grid-auto-flow: dense;"
           >
             {featuredWithImages.slice(0, 9).map((item, index) => (
-              <a
-                href="/gallery"
-                aria-label={`View details for ${item.data.title || 'gallery item'}`}
+              <div
                 class:list={[
                   'group relative aspect-square overflow-hidden border border-border bg-surface-raised transition-all hover:border-accent/40',
                   item.size === 'large' ? 'rounded-xs'
@@ -163,14 +161,14 @@ function getImageWidth(size: string): number {
                   class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading={index < 3 ? 'eager' : 'lazy'}
                 />
-              </a>
+              </div>
             ))}
           </div>
 
-          <div class="mt-8 text-center sm:hidden">
+          <div class="mt-8 text-center">
             <a
               href="/gallery"
-              class="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover"
+              class="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover sm:hidden"
               aria-label="View all work in the gallery"
             >
               View all work

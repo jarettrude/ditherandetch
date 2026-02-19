@@ -8,7 +8,6 @@
 import { getGrayOnWhite } from './alpha';
 import type { ProcessingImageData } from './types';
 
-// Helper to clamp values
 function clamp(value: number, min: number = 0, max: number = 255): number {
   return Math.max(min, Math.min(max, value));
 }
@@ -27,7 +26,7 @@ export function toGrayscale(
     result[i] = gray;
     result[i + 1] = gray;
     result[i + 2] = gray;
-    result[i + 3] = data[i + 3]!; // Preserve alpha
+    result[i + 3] = data[i + 3]!;
   }
 
   return { width, height, data: result };
@@ -161,7 +160,6 @@ export function unsharpMask(
   const { width, height, data } = imageData;
   const result = new Uint8ClampedArray(data);
 
-  // Create blurred version using box blur
   const blurred = boxBlur(imageData, radius);
 
   const amountFactor = amount / 100;
@@ -195,7 +193,6 @@ function boxBlur(
   const result = new Uint8ClampedArray(data);
   const temp = new Uint8ClampedArray(data);
 
-  // Horizontal pass
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let r = 0,
@@ -222,7 +219,6 @@ function boxBlur(
     }
   }
 
-  // Vertical pass
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       let r = 0,
@@ -263,7 +259,6 @@ export function edgeEnhance(
   const { width, height, data } = imageData;
   const result = new Uint8ClampedArray(data);
 
-  // Laplacian kernel for edge detection
   const kernel = [
     [0, -1, 0],
     [-1, 4, -1],
@@ -349,14 +344,12 @@ export function autoAdjust(
   const { width, height, data } = imageData;
   const result = new Uint8ClampedArray(data);
 
-  // Build histogram
   const histogram = new Array(256).fill(0);
   for (let i = 0; i < data.length; i += 4) {
     const gray = Math.round(getGrayOnWhite(data, i));
     histogram[gray]++;
   }
 
-  // Find min and max with 0.5% clipping
   const totalPixels = width * height;
   const clipAmount = Math.floor(totalPixels * 0.005);
 
@@ -381,7 +374,6 @@ export function autoAdjust(
     }
   }
 
-  // Apply levels adjustment
   const range = maxLevel - minLevel;
   if (range > 0) {
     for (let i = 0; i < data.length; i += 4) {
@@ -459,12 +451,10 @@ export function colorCorrection(
     for (let c = 0; c < 3; c++) {
       let value = data[i + c]!;
 
-      // Lift shadows (values below 50)
       if (value < 50) {
         value = value + (50 - value) * (shadowLift / 100);
       }
 
-      // Compress highlights (values above 230)
       if (value > 230) {
         value = 230 + (value - 230) * (1 - highlightCompress / 100);
       }
@@ -485,23 +475,18 @@ export function sketchEffect(
 ): ProcessingImageData {
   const { width, height, data } = imageData;
 
-  // First convert to grayscale
   const gray = toGrayscale({ width, height, data });
 
-  // Invert
   const inverted = invert(gray);
 
-  // Blur the inverted image
   const blurred = boxBlur(inverted, 5);
 
-  // Color dodge blend
   const result = new Uint8ClampedArray(data);
 
   for (let i = 0; i < data.length; i += 4) {
     const base = gray.data[i]!;
     const blend = blurred.data[i]!;
 
-    // Color dodge: result = base / (255 - blend)
     let value: number;
     if (blend === 255) {
       value = 255;
