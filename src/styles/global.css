@@ -213,6 +213,29 @@ p {
   @apply relative py-1 hover:text-accent transition-colors;
 }
 
+.nav-link-mobile {
+  @apply flex h-14 items-center rounded-lg px-4 text-lg font-medium transition-colors;
+}
+
+.nav-link-mobile:hover,
+.nav-link-mobile:focus-visible {
+  @apply bg-surface-raised;
+}
+
+.nav-link-mobile:not(.text-accent):hover,
+.nav-link-mobile:not(.text-accent):focus-visible {
+  @apply text-ink;
+}
+
+.nav-link-mobile:focus-visible {
+  outline: 2px solid var(--accent-0);
+  outline-offset: -2px;
+}
+
+.nav-link-mobile.text-accent {
+  @apply bg-surface-raised text-accent;
+}
+
 .gallery-item,
 .featured-item {
   aspect-ratio: 1 / 1;

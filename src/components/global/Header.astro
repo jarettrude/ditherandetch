@@ -82,60 +82,61 @@ const currentPath = url.pathname;
       aria-expanded="false"
       aria-controls="mobile-menu"
     >
-      <Icon name="menu" class="h-6 w-6" />
+      <Icon name="menu" class="h-6 w-6 icon-menu" />
+      <Icon name="close" class="h-6 w-6 hidden icon-close" />
     </button>
   </nav>
-
-  <!-- Mobile Menu -->
-  <div
-    id="mobile-menu"
-    class="fixed inset-x-0 top-[65px] bottom-0 z-40 hidden flex-col bg-surface/98 px-4 pb-8 backdrop-blur-xl md:hidden"
-  >
-    <ul class="flex flex-col gap-2 pt-6">
-      {
-        navItems.map(item => (
-          <li>
-            <a
-              href={item.href}
-              class:list={[
-                'nav-link flex h-14 items-center rounded-lg px-4 text-lg font-medium transition-colors',
-                (
-                  currentPath === item.href
-                  || currentPath.startsWith(item.href + '/')
-                ) ?
-                  'bg-surface-raised text-accent'
-                : 'text-ink-muted hover:bg-surface-raised hover:text-ink',
-              ]}
-            >
-              {item.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-
-    <div
-      class="mt-auto flex items-center justify-between border-t border-border pt-6"
-    >
-      <span class="text-md font-medium text-ink-muted">Theme</span>
-      <button
-        type="button"
-        id="theme-toggle-mobile"
-        class="flex h-12 w-12 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink"
-        aria-label="Toggle theme"
-      >
-        <Icon
-          name="sun"
-          class="h-6 w-6 hidden [html:not([data-theme])_&]:block"
-        />
-        <Icon
-          name="moon"
-          class="h-6 w-6 hidden [html[data-theme='light']_&]:block"
-        />
-      </button>
-    </div>
-  </div>
 </header>
+
+<!-- Mobile Menu -->
+<div
+  id="mobile-menu"
+  class="fixed inset-x-0 top-[81px] bottom-0 z-40 hidden flex-col bg-surface/95 backdrop-blur-xl px-4 pb-8 md:hidden shadow-lg"
+>
+  <ul class="flex flex-col gap-2 pt-6">
+    {
+      navItems.map(item => (
+        <li>
+          <a
+            href={item.href}
+            class:list={[
+              'nav-link-mobile',
+              (
+                currentPath === item.href
+                || currentPath.startsWith(item.href + '/')
+              ) ?
+                'text-accent'
+              : 'text-ink-muted',
+            ]}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div
+    class="mt-auto flex items-center justify-between border-t border-border pt-6"
+  >
+    <span class="text-md font-medium text-ink-muted">Theme</span>
+    <button
+      type="button"
+      id="theme-toggle-mobile"
+      class="flex h-12 w-12 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-surface-raised hover:text-ink"
+      aria-label="Toggle theme"
+    >
+      <Icon
+        name="sun"
+        class="h-6 w-6 hidden [html:not([data-theme])_&]:block"
+      />
+      <Icon
+        name="moon"
+        class="h-6 w-6 hidden [html[data-theme='light']_&]:block"
+      />
+    </button>
+  </div>
+</div>
 
 <script>
   function initHeader() {
@@ -161,7 +162,17 @@ const currentPath = url.pathname;
         mobileMenuBtn.setAttribute('aria-expanded', 'true');
         mobileMenuBtn.setAttribute('aria-label', 'Close menu');
         document.body.style.overflow = 'hidden';
-        siteRoot.setAttribute('inert', '');
+        // Set inert on background content to trap focus
+        document.getElementById('main')?.setAttribute('inert', '');
+        document.querySelector('footer')?.setAttribute('inert', '');
+        document.querySelector('astro-island')?.setAttribute('inert', '');
+        // Toggle icons
+        const menuIcon = mobileMenuBtn.querySelector('.icon-menu');
+        const closeIcon = mobileMenuBtn.querySelector('.icon-close');
+        if (menuIcon && closeIcon) {
+          menuIcon.classList.add('hidden');
+          closeIcon.classList.remove('hidden');
+        }
         // Small delay to ensure rendering before focus trap
         setTimeout(() => {
           const firstLink = mobileMenu.querySelector('a');
@@ -173,7 +184,17 @@ const currentPath = url.pathname;
         mobileMenuBtn.setAttribute('aria-expanded', 'false');
         mobileMenuBtn.setAttribute('aria-label', 'Open menu');
         document.body.style.overflow = '';
-        siteRoot.removeAttribute('inert');
+        // Remove inert from background content
+        document.getElementById('main')?.removeAttribute('inert');
+        document.querySelector('footer')?.removeAttribute('inert');
+        document.querySelector('astro-island')?.removeAttribute('inert');
+        // Toggle icons back
+        const menuIcon = mobileMenuBtn.querySelector('.icon-menu');
+        const closeIcon = mobileMenuBtn.querySelector('.icon-close');
+        if (menuIcon && closeIcon) {
+          menuIcon.classList.remove('hidden');
+          closeIcon.classList.add('hidden');
+        }
         mobileMenuBtn.focus();
       }
     }

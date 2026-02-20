@@ -60,6 +60,7 @@ test.describe('Accessibility Tests (WCAG 2.1 AA)', () => {
         page: browserPage,
       })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+        .exclude('#astro-dev-toolbar')
         .analyze();
 
       expect.soft(accessibilityScanResults.violations).toEqual([]);
@@ -190,6 +191,7 @@ test.describe('Dark Mode Accessibility', () => {
         page: browserPage,
       })
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+        .exclude('#astro-dev-toolbar')
         .analyze();
 
       expect.soft(accessibilityScanResults.violations).toEqual([]);
@@ -384,6 +386,7 @@ test.describe('Mobile Accessibility', () => {
       page,
     })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .exclude('#astro-dev-toolbar')
       .analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
