@@ -47,6 +47,7 @@ export default defineConfig(
       'no-debugger': 'error',
       'prefer-const': 'error',
       'no-var': 'error',
+      'no-useless-assignment': 'off', // False positives for prev variables and conditional initialization
 
       // Accessibility rules
       'jsx-a11y/alt-text': 'error',
@@ -161,6 +162,7 @@ export default defineConfig(
       ...svelte.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': 'off', // Svelte reactive vars are template-bound
       'no-console': 'off',
+      'no-useless-assignment': 'off', // False positives for prev variables and conditional initialization
     },
   },
 
