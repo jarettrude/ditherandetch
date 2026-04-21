@@ -56,7 +56,7 @@
     "@fontsource/literata": "^5.2.8",
     "@huggingface/transformers": "^3.8.1",
     "@tailwindcss/vite": "^4.2.2",
-    "astro": "^5.18.1",
+    "astro": "^6.1.6",
     "heic-to": "^1.4.2",
     "markdownlint-cli2": "^0.21.0",
     "sharp": "^0.34.5",
