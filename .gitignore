@@ -20,14 +20,4 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
-# windsurf setting folder
-.windsurf/
-.agents/
 
-# Lighthouse CI
-.lighthouseci/
-
-# Playwright
-test-results/
-playwright-report/
-playwright/.cache/
