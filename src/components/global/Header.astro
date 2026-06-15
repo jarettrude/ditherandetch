@@ -2,10 +2,10 @@
 import Icon from './Icon.astro';
 
 const navItems = [
-  { href: '/gallery', label: 'Gallery' },
-  { href: '/contact', label: 'Contact' },
-  { href: '/tools', label: 'Tools' },
-  { href: '/journal', label: 'Journal' },
+  { href: '/gallery/', label: 'Gallery' },
+  { href: '/contact/', label: 'Contact' },
+  { href: '/tools/', label: 'Tools' },
+  { href: '/journal/', label: 'Journal' },
 ];
 
 const { url } = Astro;
@@ -33,8 +33,7 @@ const currentPath = url.pathname;
     <!-- Desktop Nav -->
     <div class="hidden items-center gap-8 md:flex">
       <ul class="flex items-center gap-8">
-        {
-          navItems.map(item => (
+        {navItems.map(item => (
             <li>
               <a
                 href={item.href}
@@ -51,8 +50,7 @@ const currentPath = url.pathname;
                 {item.label}
               </a>
             </li>
-          ))
-        }
+          ))}
       </ul>
 
       <!-- Theme Toggle -->
@@ -94,8 +92,7 @@ const currentPath = url.pathname;
   class="fixed inset-x-0 top-[81px] bottom-0 z-40 hidden flex-col bg-surface/95 backdrop-blur-xl px-4 pb-8 md:hidden shadow-lg"
 >
   <ul class="flex flex-col gap-2 pt-6">
-    {
-      navItems.map(item => (
+    {navItems.map(item => (
         <li>
           <a
             href={item.href}
@@ -112,8 +109,7 @@ const currentPath = url.pathname;
             {item.label}
           </a>
         </li>
-      ))
-    }
+      ))}
   </ul>
 
   <div
@@ -139,115 +135,115 @@ const currentPath = url.pathname;
 </div>
 
 <script>
-  function initHeader() {
-    const mobileMenuBtn = document.getElementById(
-      'mobile-menu-btn',
-    ) as HTMLButtonElement | null;
-    const mobileMenu = document.getElementById('mobile-menu');
-    const siteRoot = document.getElementById('site-root');
-    const themeToggles = [
-      document.getElementById('theme-toggle'),
-      document.getElementById('theme-toggle-mobile'),
-    ];
+function initHeader() {
+  const mobileMenuBtn = document.getElementById(
+    'mobile-menu-btn',
+  ) as HTMLButtonElement | null;
+  const mobileMenu = document.getElementById('mobile-menu');
+  const siteRoot = document.getElementById('site-root');
+  const themeToggles = [
+    document.getElementById('theme-toggle'),
+    document.getElementById('theme-toggle-mobile'),
+  ];
 
-    function toggleMenu(force?: boolean) {
-      if (!mobileMenu || !mobileMenuBtn || !siteRoot) return;
+  function toggleMenu(force?: boolean) {
+    if (!mobileMenu || !mobileMenuBtn || !siteRoot) return;
 
-      const isOpen =
-        force !== undefined ? force : mobileMenu.classList.contains('hidden');
+    const isOpen =
+      force !== undefined ? force : mobileMenu.classList.contains('hidden');
 
-      if (isOpen) {
-        // Open
-        mobileMenu.classList.remove('hidden');
-        mobileMenuBtn.setAttribute('aria-expanded', 'true');
-        mobileMenuBtn.setAttribute('aria-label', 'Close menu');
-        document.body.style.overflow = 'hidden';
-        // Set inert on background content to trap focus
-        document.getElementById('main')?.setAttribute('inert', '');
-        document.querySelector('footer')?.setAttribute('inert', '');
-        document.querySelector('astro-island')?.setAttribute('inert', '');
-        // Toggle icons
-        const menuIcon = mobileMenuBtn.querySelector('.icon-menu');
-        const closeIcon = mobileMenuBtn.querySelector('.icon-close');
-        if (menuIcon && closeIcon) {
-          menuIcon.classList.add('hidden');
-          closeIcon.classList.remove('hidden');
-        }
-        // Small delay to ensure rendering before focus trap
-        setTimeout(() => {
-          const firstLink = mobileMenu.querySelector('a');
-          firstLink?.focus();
-        }, 10);
-      } else {
-        // Close
-        mobileMenu.classList.add('hidden');
-        mobileMenuBtn.setAttribute('aria-expanded', 'false');
-        mobileMenuBtn.setAttribute('aria-label', 'Open menu');
-        document.body.style.overflow = '';
-        // Remove inert from background content
-        document.getElementById('main')?.removeAttribute('inert');
-        document.querySelector('footer')?.removeAttribute('inert');
-        document.querySelector('astro-island')?.removeAttribute('inert');
-        // Toggle icons back
-        const menuIcon = mobileMenuBtn.querySelector('.icon-menu');
-        const closeIcon = mobileMenuBtn.querySelector('.icon-close');
-        if (menuIcon && closeIcon) {
-          menuIcon.classList.remove('hidden');
-          closeIcon.classList.add('hidden');
-        }
-        mobileMenuBtn.focus();
+    if (isOpen) {
+      // Open
+      mobileMenu.classList.remove('hidden');
+      mobileMenuBtn.setAttribute('aria-expanded', 'true');
+      mobileMenuBtn.setAttribute('aria-label', 'Close menu');
+      document.body.style.overflow = 'hidden';
+      // Set inert on background content to trap focus
+      document.getElementById('main')?.setAttribute('inert', '');
+      document.querySelector('footer')?.setAttribute('inert', '');
+      document.querySelector('astro-island')?.setAttribute('inert', '');
+      // Toggle icons
+      const menuIcon = mobileMenuBtn.querySelector('.icon-menu');
+      const closeIcon = mobileMenuBtn.querySelector('.icon-close');
+      if (menuIcon && closeIcon) {
+        menuIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
       }
+      // Small delay to ensure rendering before focus trap
+      setTimeout(() => {
+        const firstLink = mobileMenu.querySelector('a');
+        firstLink?.focus();
+      }, 10);
+    } else {
+      // Close
+      mobileMenu.classList.add('hidden');
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+      mobileMenuBtn.setAttribute('aria-label', 'Open menu');
+      document.body.style.overflow = '';
+      // Remove inert from background content
+      document.getElementById('main')?.removeAttribute('inert');
+      document.querySelector('footer')?.removeAttribute('inert');
+      document.querySelector('astro-island')?.removeAttribute('inert');
+      // Toggle icons back
+      const menuIcon = mobileMenuBtn.querySelector('.icon-menu');
+      const closeIcon = mobileMenuBtn.querySelector('.icon-close');
+      if (menuIcon && closeIcon) {
+        menuIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+      mobileMenuBtn.focus();
     }
-
-    mobileMenuBtn?.addEventListener('click', () => toggleMenu());
-
-    // Listeners for escape key and focus trapping
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        toggleMenu(false);
-      }
-
-      // Focus trapping
-      if (
-        e.key === 'Tab'
-        && mobileMenu
-        && !mobileMenu.classList.contains('hidden')
-      ) {
-        const focusables = mobileMenu.querySelectorAll('a, button');
-        const first = focusables[0] as HTMLElement;
-        const last = focusables[focusables.length - 1] as HTMLElement;
-
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    });
-
-    // Theme toggle
-    function toggleTheme() {
-      const html = document.documentElement;
-      const currentTheme = html.getAttribute('data-theme');
-      const newTheme = currentTheme === 'light' ? null : 'light';
-
-      if (newTheme) {
-        html.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-      } else {
-        html.removeAttribute('data-theme');
-        localStorage.removeItem('theme');
-      }
-    }
-
-    themeToggles.forEach(btn => btn?.addEventListener('click', toggleTheme));
   }
 
-  // Run on initial load
-  initHeader();
+  mobileMenuBtn?.addEventListener('click', () => toggleMenu());
 
-  // Re-run after View Transitions
-  document.addEventListener('astro:after-swap', initHeader);
+  // Listeners for escape key and focus trapping
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      toggleMenu(false);
+    }
+
+    // Focus trapping
+    if (
+      e.key === 'Tab' &&
+      mobileMenu &&
+      !mobileMenu.classList.contains('hidden')
+    ) {
+      const focusables = mobileMenu.querySelectorAll('a, button');
+      const first = focusables[0] as HTMLElement;
+      const last = focusables[focusables.length - 1] as HTMLElement;
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  // Theme toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? null : 'light';
+
+    if (newTheme) {
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    } else {
+      html.removeAttribute('data-theme');
+      localStorage.removeItem('theme');
+    }
+  }
+
+  themeToggles.forEach(btn => btn?.addEventListener('click', toggleTheme));
+}
+
+// Run on initial load
+initHeader();
+
+// Re-run after View Transitions
+document.addEventListener('astro:after-swap', initHeader);
 </script>

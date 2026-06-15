@@ -1,393 +1,393 @@
 <script lang="ts">
-  import { normalizeImageFile, IMAGE_ACCEPT } from '../../lib/imageFiles';
-  import {
-    predefinedMasks,
-    applyShapeMask,
-    generateShapeMask,
-    invertMask as invertMaskFn,
-  } from '../../lib/imageProcessing/masking';
+import { IMAGE_ACCEPT, normalizeImageFile } from '../../lib/imageFiles';
+import {
+  applyShapeMask,
+  generateShapeMask,
+  invertMask as invertMaskFn,
+  predefinedMasks,
+} from '../../lib/imageProcessing/masking';
 
-  let imageFile: File | null = null;
-  let imageUrl: string | null = null;
-  let processedUrl: string | null = null;
-  let maskPreviewUrl: string | null = null;
-  let isProcessing = false;
-  let imageSize = { width: 0, height: 0 };
-  let fileInput: HTMLInputElement;
-  let errorMessage = '';
-  let selectedMask = 'circle';
-  let featherAmount = 0;
-  let invertMask = false;
-  let showMaskPreview = false;
-  let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-  let cachedImageData: ImageData | null = null;
+let imageFile: File | null = null;
+let imageUrl: string | null = null;
+let processedUrl: string | null = null;
+let maskPreviewUrl: string | null = null;
+let isProcessing = false;
+let imageSize = { width: 0, height: 0 };
+let fileInput: HTMLInputElement;
+let errorMessage = '';
+let selectedMask = 'circle';
+let featherAmount = 0;
+let invertMask = false;
+let showMaskPreview = false;
+let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let cachedImageData: ImageData | null = null;
 
-  // Mask position and scale
-  let maskX = 0.5; // 0-1, center of mask relative to image
-  let maskY = 0.5;
-  let maskScale = 1.0; // 1.0 = mask fits image, smaller = smaller mask
-  let isDragging = false;
-  let dragStartX = 0;
-  let dragStartY = 0;
-  let dragStartMaskX = 0;
-  let dragStartMaskY = 0;
-  let previewContainer: HTMLDivElement;
+// Mask position and scale
+let maskX = 0.5; // 0-1, center of mask relative to image
+let maskY = 0.5;
+let maskScale = 1.0; // 1.0 = mask fits image, smaller = smaller mask
+let isDragging = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let dragStartMaskX = 0;
+let dragStartMaskY = 0;
+let previewContainer: HTMLDivElement;
 
-  function handleFile(file: File) {
-    normalizeImageFile(file)
-      .then(normalized => {
-        imageFile = normalized;
-        imageUrl = URL.createObjectURL(normalized);
-        loadImageSize(imageUrl);
-      })
-      .catch(() => {
-        imageFile = file;
-        imageUrl = URL.createObjectURL(file);
-        loadImageSize(imageUrl);
-      });
+function handleFile(file: File) {
+  normalizeImageFile(file)
+    .then(normalized => {
+      imageFile = normalized;
+      imageUrl = URL.createObjectURL(normalized);
+      loadImageSize(imageUrl);
+    })
+    .catch(() => {
+      imageFile = file;
+      imageUrl = URL.createObjectURL(file);
+      loadImageSize(imageUrl);
+    });
+}
+
+async function loadImageSize(url: string) {
+  const img = new Image();
+  img.onload = async () => {
+    imageSize = { width: img.width, height: img.height };
+    processedUrl = null;
+
+    // Cache the image data for live preview
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0);
+    cachedImageData = ctx.getImageData(0, 0, img.width, img.height);
+
+    // Generate initial preview
+    updatePreview();
+  };
+  img.src = url;
+}
+
+function handleDrop(e: DragEvent) {
+  e.preventDefault();
+  const file = e.dataTransfer?.files[0];
+  if (file) handleFile(file);
+}
+
+function handleInputChange(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (file) {
+    handleFile(file);
+    input.value = '';
   }
+}
 
-  async function loadImageSize(url: string) {
-    const img = new Image();
-    img.onload = async () => {
-      imageSize = { width: img.width, height: img.height };
-      processedUrl = null;
-
-      // Cache the image data for live preview
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0);
-      cachedImageData = ctx.getImageData(0, 0, img.width, img.height);
-
-      // Generate initial preview
-      updatePreview();
-    };
-    img.src = url;
+function updatePreview() {
+  if (previewDebounceTimer) {
+    clearTimeout(previewDebounceTimer);
   }
+  previewDebounceTimer = setTimeout(() => {
+    generatePreview();
+  }, 50);
+}
 
-  function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    const file = e.dataTransfer?.files[0];
-    if (file) handleFile(file);
-  }
+async function generatePreview() {
+  if (!cachedImageData || !imageUrl) return;
 
-  function handleInputChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      handleFile(file);
-      input.value = '';
-    }
-  }
+  try {
+    const { width, height } = cachedImageData;
 
-  function updatePreview() {
-    if (previewDebounceTimer) {
-      clearTimeout(previewDebounceTimer);
-    }
-    previewDebounceTimer = setTimeout(() => {
-      generatePreview();
-    }, 50);
-  }
+    // Generate mask at the specified position and scale
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = width;
+    maskCanvas.height = height;
+    const maskCtx = maskCanvas.getContext('2d')!;
 
-  async function generatePreview() {
-    if (!cachedImageData || !imageUrl) return;
+    // Fill with black (transparent in result)
+    maskCtx.fillStyle = invertMask ? 'white' : 'black';
+    maskCtx.fillRect(0, 0, width, height);
 
-    try {
-      const { width, height } = cachedImageData;
+    // Calculate mask dimensions based on scale
+    const maskSize = Math.min(width, height) * maskScale;
+    const maskCenterX = width * maskX;
+    const maskCenterY = height * maskY;
 
-      // Generate mask at the specified position and scale
-      const maskCanvas = document.createElement('canvas');
-      maskCanvas.width = width;
-      maskCanvas.height = height;
-      const maskCtx = maskCanvas.getContext('2d')!;
-
-      // Fill with black (transparent in result)
-      maskCtx.fillStyle = invertMask ? 'white' : 'black';
-      maskCtx.fillRect(0, 0, width, height);
-
-      // Calculate mask dimensions based on scale
-      const maskSize = Math.min(width, height) * maskScale;
-      const maskCenterX = width * maskX;
-      const maskCenterY = height * maskY;
-
-      // Generate the shape mask at full size then position it
-      const shapeMaskSize = Math.round(maskSize);
-      if (shapeMaskSize > 0) {
-        let shapeMask = generateShapeMask(
-          selectedMask,
-          shapeMaskSize,
-          shapeMaskSize,
-        );
-        if (invertMask) {
-          shapeMask = invertMaskFn(shapeMask);
-        }
-
-        // Create temp canvas for the shape
-        const shapeCanvas = document.createElement('canvas');
-        shapeCanvas.width = shapeMaskSize;
-        shapeCanvas.height = shapeMaskSize;
-        const shapeCtx = shapeCanvas.getContext('2d')!;
-        shapeCtx.putImageData(shapeMask, 0, 0);
-
-        // Draw shape at position
-        const drawX = maskCenterX - shapeMaskSize / 2;
-        const drawY = maskCenterY - shapeMaskSize / 2;
-        maskCtx.drawImage(shapeCanvas, drawX, drawY);
+    // Generate the shape mask at full size then position it
+    const shapeMaskSize = Math.round(maskSize);
+    if (shapeMaskSize > 0) {
+      let shapeMask = generateShapeMask(
+        selectedMask,
+        shapeMaskSize,
+        shapeMaskSize,
+      );
+      if (invertMask) {
+        shapeMask = invertMaskFn(shapeMask);
       }
 
-      maskPreviewUrl = maskCanvas.toDataURL('image/png');
+      // Create temp canvas for the shape
+      const shapeCanvas = document.createElement('canvas');
+      shapeCanvas.width = shapeMaskSize;
+      shapeCanvas.height = shapeMaskSize;
+      const shapeCtx = shapeCanvas.getContext('2d')!;
+      shapeCtx.putImageData(shapeMask, 0, 0);
 
-      // Apply mask to image
-      const maskImageData = maskCtx.getImageData(0, 0, width, height);
-
-      // Apply feathering to mask if needed
-      let finalMask = maskImageData;
-      if (featherAmount > 0) {
-        // Simple box blur for feathering (limited for preview speed)
-        const blurRadius = Math.min(featherAmount, 10);
-        finalMask = featherMaskData(maskImageData, blurRadius);
-      }
-
-      // Create result with mask applied
-      const resultCanvas = document.createElement('canvas');
-      resultCanvas.width = width;
-      resultCanvas.height = height;
-      const resultCtx = resultCanvas.getContext('2d')!;
-
-      const resultData = resultCtx.createImageData(width, height);
-      for (let i = 0; i < width * height; i++) {
-        const idx = i * 4;
-        resultData.data[idx] = cachedImageData.data[idx];
-        resultData.data[idx + 1] = cachedImageData.data[idx + 1];
-        resultData.data[idx + 2] = cachedImageData.data[idx + 2];
-        // Use red channel of mask as alpha
-        resultData.data[idx + 3] = finalMask.data[idx];
-      }
-
-      resultCtx.putImageData(resultData, 0, 0);
-      processedUrl = resultCanvas.toDataURL('image/png');
-    } catch (error) {
-      console.error('Preview error:', error);
+      // Draw shape at position
+      const drawX = maskCenterX - shapeMaskSize / 2;
+      const drawY = maskCenterY - shapeMaskSize / 2;
+      maskCtx.drawImage(shapeCanvas, drawX, drawY);
     }
+
+    maskPreviewUrl = maskCanvas.toDataURL('image/png');
+
+    // Apply mask to image
+    const maskImageData = maskCtx.getImageData(0, 0, width, height);
+
+    // Apply feathering to mask if needed
+    let finalMask = maskImageData;
+    if (featherAmount > 0) {
+      // Simple box blur for feathering (limited for preview speed)
+      const blurRadius = Math.min(featherAmount, 10);
+      finalMask = featherMaskData(maskImageData, blurRadius);
+    }
+
+    // Create result with mask applied
+    const resultCanvas = document.createElement('canvas');
+    resultCanvas.width = width;
+    resultCanvas.height = height;
+    const resultCtx = resultCanvas.getContext('2d')!;
+
+    const resultData = resultCtx.createImageData(width, height);
+    for (let i = 0; i < width * height; i++) {
+      const idx = i * 4;
+      resultData.data[idx] = cachedImageData.data[idx];
+      resultData.data[idx + 1] = cachedImageData.data[idx + 1];
+      resultData.data[idx + 2] = cachedImageData.data[idx + 2];
+      // Use red channel of mask as alpha
+      resultData.data[idx + 3] = finalMask.data[idx];
+    }
+
+    resultCtx.putImageData(resultData, 0, 0);
+    processedUrl = resultCanvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Preview error:', error);
   }
+}
 
-  // Simple feathering function
-  function featherMaskData(maskData: ImageData, radius: number): ImageData {
-    const { width, height, data } = maskData;
-    const result = new ImageData(new Uint8ClampedArray(data), width, height);
+// Simple feathering function
+function featherMaskData(maskData: ImageData, radius: number): ImageData {
+  const { width, height, data } = maskData;
+  const result = new ImageData(new Uint8ClampedArray(data), width, height);
 
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        let sum = 0;
-        let count = 0;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sum = 0;
+      let count = 0;
 
-        for (let dy = -radius; dy <= radius; dy++) {
-          for (let dx = -radius; dx <= radius; dx++) {
-            const px = x + dx;
-            const py = y + dy;
-            if (px >= 0 && px < width && py >= 0 && py < height) {
-              const idx = (py * width + px) * 4;
-              sum += data[idx];
-              count++;
-            }
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const px = x + dx;
+          const py = y + dy;
+          if (px >= 0 && px < width && py >= 0 && py < height) {
+            const idx = (py * width + px) * 4;
+            sum += data[idx];
+            count++;
           }
         }
-
-        const idx = (y * width + x) * 4;
-        const avg = Math.round(sum / count);
-        result.data[idx] = avg;
-        result.data[idx + 1] = avg;
-        result.data[idx + 2] = avg;
       }
-    }
 
-    return result;
+      const idx = (y * width + x) * 4;
+      const avg = Math.round(sum / count);
+      result.data[idx] = avg;
+      result.data[idx + 1] = avg;
+      result.data[idx + 2] = avg;
+    }
   }
 
-  async function applyMask() {
-    if (!cachedImageData) return;
-    isProcessing = true;
-    errorMessage = '';
+  return result;
+}
 
-    try {
-      // Generate full quality mask with current position/scale
-      const { width, height } = cachedImageData;
+async function applyMask() {
+  if (!cachedImageData) return;
+  isProcessing = true;
+  errorMessage = '';
 
-      const maskCanvas = document.createElement('canvas');
-      maskCanvas.width = width;
-      maskCanvas.height = height;
-      const maskCtx = maskCanvas.getContext('2d')!;
+  try {
+    // Generate full quality mask with current position/scale
+    const { width, height } = cachedImageData;
 
-      maskCtx.fillStyle = invertMask ? 'white' : 'black';
-      maskCtx.fillRect(0, 0, width, height);
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = width;
+    maskCanvas.height = height;
+    const maskCtx = maskCanvas.getContext('2d')!;
 
-      const maskSize = Math.min(width, height) * maskScale;
-      const maskCenterX = width * maskX;
-      const maskCenterY = height * maskY;
+    maskCtx.fillStyle = invertMask ? 'white' : 'black';
+    maskCtx.fillRect(0, 0, width, height);
 
-      const shapeMaskSize = Math.round(maskSize);
-      if (shapeMaskSize > 0) {
-        let shapeMask = generateShapeMask(
-          selectedMask,
-          shapeMaskSize,
-          shapeMaskSize,
-        );
-        if (invertMask) {
-          shapeMask = invertMaskFn(shapeMask);
-        }
+    const maskSize = Math.min(width, height) * maskScale;
+    const maskCenterX = width * maskX;
+    const maskCenterY = height * maskY;
 
-        const shapeCanvas = document.createElement('canvas');
-        shapeCanvas.width = shapeMaskSize;
-        shapeCanvas.height = shapeMaskSize;
-        const shapeCtx = shapeCanvas.getContext('2d')!;
-        shapeCtx.putImageData(shapeMask, 0, 0);
-
-        const drawX = maskCenterX - shapeMaskSize / 2;
-        const drawY = maskCenterY - shapeMaskSize / 2;
-        maskCtx.drawImage(shapeCanvas, drawX, drawY);
+    const shapeMaskSize = Math.round(maskSize);
+    if (shapeMaskSize > 0) {
+      let shapeMask = generateShapeMask(
+        selectedMask,
+        shapeMaskSize,
+        shapeMaskSize,
+      );
+      if (invertMask) {
+        shapeMask = invertMaskFn(shapeMask);
       }
 
-      let maskImageData = maskCtx.getImageData(0, 0, width, height);
+      const shapeCanvas = document.createElement('canvas');
+      shapeCanvas.width = shapeMaskSize;
+      shapeCanvas.height = shapeMaskSize;
+      const shapeCtx = shapeCanvas.getContext('2d')!;
+      shapeCtx.putImageData(shapeMask, 0, 0);
 
-      // Apply full feathering
-      if (featherAmount > 0) {
-        maskImageData = featherMaskData(maskImageData, featherAmount);
-      }
+      const drawX = maskCenterX - shapeMaskSize / 2;
+      const drawY = maskCenterY - shapeMaskSize / 2;
+      maskCtx.drawImage(shapeCanvas, drawX, drawY);
+    }
 
-      // Apply mask to image
-      const resultCanvas = document.createElement('canvas');
-      resultCanvas.width = width;
-      resultCanvas.height = height;
-      const resultCtx = resultCanvas.getContext('2d')!;
+    let maskImageData = maskCtx.getImageData(0, 0, width, height);
 
-      const resultData = resultCtx.createImageData(width, height);
-      for (let i = 0; i < width * height; i++) {
-        const idx = i * 4;
-        resultData.data[idx] = cachedImageData.data[idx];
-        resultData.data[idx + 1] = cachedImageData.data[idx + 1];
-        resultData.data[idx + 2] = cachedImageData.data[idx + 2];
-        resultData.data[idx + 3] = maskImageData.data[idx];
-      }
+    // Apply full feathering
+    if (featherAmount > 0) {
+      maskImageData = featherMaskData(maskImageData, featherAmount);
+    }
 
-      resultCtx.putImageData(resultData, 0, 0);
-      processedUrl = resultCanvas.toDataURL('image/png');
-    } catch (error) {
-      console.error('Masking error:', error);
-      errorMessage =
-        error instanceof Error ?
-          error.message
+    // Apply mask to image
+    const resultCanvas = document.createElement('canvas');
+    resultCanvas.width = width;
+    resultCanvas.height = height;
+    const resultCtx = resultCanvas.getContext('2d')!;
+
+    const resultData = resultCtx.createImageData(width, height);
+    for (let i = 0; i < width * height; i++) {
+      const idx = i * 4;
+      resultData.data[idx] = cachedImageData.data[idx];
+      resultData.data[idx + 1] = cachedImageData.data[idx + 1];
+      resultData.data[idx + 2] = cachedImageData.data[idx + 2];
+      resultData.data[idx + 3] = maskImageData.data[idx];
+    }
+
+    resultCtx.putImageData(resultData, 0, 0);
+    processedUrl = resultCanvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Masking error:', error);
+    errorMessage =
+      error instanceof Error
+        ? error.message
         : 'Failed to apply mask. Please try again.';
-    } finally {
-      isProcessing = false;
-    }
+  } finally {
+    isProcessing = false;
   }
+}
 
-  function downloadImage() {
-    if (!processedUrl) return;
-    const link = document.createElement('a');
-    link.download = 'masked-image.png';
-    link.href = processedUrl;
-    link.click();
-  }
+function downloadImage() {
+  if (!processedUrl) return;
+  const link = document.createElement('a');
+  link.download = 'masked-image.png';
+  link.href = processedUrl;
+  link.click();
+}
 
-  function changeImage() {
-    imageFile = null;
-    imageUrl = null;
-    processedUrl = null;
-    maskPreviewUrl = null;
-    cachedImageData = null;
-    requestAnimationFrame(() => fileInput?.click());
-  }
+function changeImage() {
+  imageFile = null;
+  imageUrl = null;
+  processedUrl = null;
+  maskPreviewUrl = null;
+  cachedImageData = null;
+  requestAnimationFrame(() => fileInput?.click());
+}
 
-  function reset() {
-    selectedMask = 'circle';
-    featherAmount = 0;
-    invertMask = false;
-    maskX = 0.5;
-    maskY = 0.5;
-    maskScale = 1.0;
-    processedUrl = null;
-    maskPreviewUrl = null;
-    if (cachedImageData) {
-      updatePreview();
-    }
-  }
-
-  // Drag handlers for mask positioning
-  function handleMouseDown(e: MouseEvent) {
-    if (!previewContainer) return;
-    isDragging = true;
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    dragStartMaskX = maskX;
-    dragStartMaskY = maskY;
-    e.preventDefault();
-  }
-
-  function handleMouseMove(e: MouseEvent) {
-    if (!isDragging || !previewContainer) return;
-
-    const rect = previewContainer.getBoundingClientRect();
-    const deltaX = (e.clientX - dragStartX) / rect.width;
-    const deltaY = (e.clientY - dragStartY) / rect.height;
-
-    maskX = Math.max(0, Math.min(1, dragStartMaskX + deltaX));
-    maskY = Math.max(0, Math.min(1, dragStartMaskY + deltaY));
+function reset() {
+  selectedMask = 'circle';
+  featherAmount = 0;
+  invertMask = false;
+  maskX = 0.5;
+  maskY = 0.5;
+  maskScale = 1.0;
+  processedUrl = null;
+  maskPreviewUrl = null;
+  if (cachedImageData) {
     updatePreview();
   }
+}
 
-  function handleMouseUp() {
-    isDragging = false;
-  }
+// Drag handlers for mask positioning
+function handleMouseDown(e: MouseEvent) {
+  if (!previewContainer) return;
+  isDragging = true;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+  dragStartMaskX = maskX;
+  dragStartMaskY = maskY;
+  e.preventDefault();
+}
 
-  // Touch handlers for mobile
-  function handleTouchStart(e: TouchEvent) {
-    if (!previewContainer || e.touches.length !== 1) return;
-    isDragging = true;
-    dragStartX = e.touches[0].clientX;
-    dragStartY = e.touches[0].clientY;
-    dragStartMaskX = maskX;
-    dragStartMaskY = maskY;
-    e.preventDefault();
-  }
+function handleMouseMove(e: MouseEvent) {
+  if (!isDragging || !previewContainer) return;
 
-  function handleTouchMove(e: TouchEvent) {
-    if (!isDragging || !previewContainer || e.touches.length !== 1) return;
+  const rect = previewContainer.getBoundingClientRect();
+  const deltaX = (e.clientX - dragStartX) / rect.width;
+  const deltaY = (e.clientY - dragStartY) / rect.height;
 
-    const rect = previewContainer.getBoundingClientRect();
-    const deltaX = (e.touches[0].clientX - dragStartX) / rect.width;
-    const deltaY = (e.touches[0].clientY - dragStartY) / rect.height;
+  maskX = Math.max(0, Math.min(1, dragStartMaskX + deltaX));
+  maskY = Math.max(0, Math.min(1, dragStartMaskY + deltaY));
+  updatePreview();
+}
 
-    maskX = Math.max(0, Math.min(1, dragStartMaskX + deltaX));
-    maskY = Math.max(0, Math.min(1, dragStartMaskY + deltaY));
-    updatePreview();
-  }
+function handleMouseUp() {
+  isDragging = false;
+}
 
-  function handleTouchEnd() {
-    isDragging = false;
-  }
+// Touch handlers for mobile
+function handleTouchStart(e: TouchEvent) {
+  if (!previewContainer || e.touches.length !== 1) return;
+  isDragging = true;
+  dragStartX = e.touches[0].clientX;
+  dragStartY = e.touches[0].clientY;
+  dragStartMaskX = maskX;
+  dragStartMaskY = maskY;
+  e.preventDefault();
+}
 
-  // Reactive updates when settings change
-  let prevMask = selectedMask;
-  let prevFeather = featherAmount;
-  let prevInvert = invertMask;
-  let prevScale = maskScale;
+function handleTouchMove(e: TouchEvent) {
+  if (!isDragging || !previewContainer || e.touches.length !== 1) return;
 
-  $: if (
-    cachedImageData
-    && (selectedMask !== prevMask
-      || featherAmount !== prevFeather
-      || invertMask !== prevInvert
-      || maskScale !== prevScale)
-  ) {
-    prevMask = selectedMask;
-    prevFeather = featherAmount;
-    prevInvert = invertMask;
-    prevScale = maskScale;
-    updatePreview();
-  }
+  const rect = previewContainer.getBoundingClientRect();
+  const deltaX = (e.touches[0].clientX - dragStartX) / rect.width;
+  const deltaY = (e.touches[0].clientY - dragStartY) / rect.height;
+
+  maskX = Math.max(0, Math.min(1, dragStartMaskX + deltaX));
+  maskY = Math.max(0, Math.min(1, dragStartMaskY + deltaY));
+  updatePreview();
+}
+
+function handleTouchEnd() {
+  isDragging = false;
+}
+
+// Reactive updates when settings change
+let prevMask = selectedMask;
+let prevFeather = featherAmount;
+let prevInvert = invertMask;
+let prevScale = maskScale;
+
+$: if (
+  cachedImageData &&
+  (selectedMask !== prevMask ||
+    featherAmount !== prevFeather ||
+    invertMask !== prevInvert ||
+    maskScale !== prevScale)
+) {
+  prevMask = selectedMask;
+  prevFeather = featherAmount;
+  prevInvert = invertMask;
+  prevScale = maskScale;
+  updatePreview();
+}
 </script>
 
 <div class="mx-auto max-w-6xl">
@@ -397,7 +397,7 @@
     accept={IMAGE_ACCEPT}
     on:change={handleInputChange}
     class="hidden"
-  />
+  >
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
     <!-- Main Content Area -->
@@ -483,7 +483,8 @@
               </button>
             </div>
             <div class="text-sm text-ink-muted">
-              {imageSize.width} × {imageSize.height}px
+              {imageSize.width}
+              × {imageSize.height}px
             </div>
           </div>
 
@@ -505,7 +506,7 @@
               alt="Preview"
               class="max-h-full max-w-full object-contain pointer-events-none"
               draggable="false"
-            />
+            >
             <div
               class="absolute bottom-2 left-2 rounded bg-surface/80 px-2 py-1 text-xs text-ink-muted"
             >
@@ -545,7 +546,7 @@
                       src={imageUrl}
                       alt="Original"
                       class="h-full w-full object-contain"
-                    />
+                    >
                   </div>
                 </div>
                 <div>
@@ -560,7 +561,7 @@
                       src={showMaskPreview ? maskPreviewUrl : processedUrl}
                       alt={showMaskPreview ? 'Mask' : 'Preview'}
                       class="h-full w-full object-contain"
-                    />
+                    >
                   </div>
                 </div>
               </div>
@@ -659,7 +660,7 @@
                 step="0.05"
                 bind:value={maskScale}
                 class="mt-1 w-full accent-accent"
-              />
+              >
             </div>
             <div>
               <div class="flex items-center justify-between">
@@ -677,7 +678,7 @@
                 max="50"
                 bind:value={featherAmount}
                 class="mt-1 w-full accent-accent"
-              />
+              >
             </div>
             <button
               on:click={() => (invertMask = !invertMask)}
@@ -758,7 +759,8 @@
           Choose from circles, hearts, stars, and more.
         </p>
         <p class="mt-2 text-xs text-ink-muted">
-          <strong>100% private</strong> — processing happens in your browser.
+          <strong>100% private</strong>
+          — processing happens in your browser.
         </p>
       </div>
     </div>

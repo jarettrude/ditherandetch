@@ -1,160 +1,160 @@
 <script lang="ts">
-  import {
-    presets,
-    applyPreset,
-    dpiOptions,
-  } from '../../lib/imageProcessing/presets';
-  import { normalizeImageFile, IMAGE_ACCEPT } from '../../lib/imageFiles';
-  import { sanitizeRgbaForExport } from '../../lib/imageProcessing/alpha';
+import { IMAGE_ACCEPT, normalizeImageFile } from '../../lib/imageFiles';
+import { sanitizeRgbaForExport } from '../../lib/imageProcessing/alpha';
+import {
+  applyPreset,
+  dpiOptions,
+  presets,
+} from '../../lib/imageProcessing/presets';
 
-  type Step = 'upload' | 'resize' | 'preset' | 'download';
+type Step = 'upload' | 'resize' | 'preset' | 'download';
 
-  let currentStep: Step = 'upload';
-  let imageFile: File | null = null;
-  let imageUrl: string | null = null;
-  let processedUrl: string | null = null;
-  let isProcessing = false;
-  let imageSize = { width: 0, height: 0 };
-  let targetSize = { width: 0, height: 0, dpi: 254 };
-  let selectedPreset = 'photoRealism';
-  let fileInput: HTMLInputElement;
+let currentStep: Step = 'upload';
+let imageFile: File | null = null;
+let imageUrl: string | null = null;
+let processedUrl: string | null = null;
+let isProcessing = false;
+let imageSize = { width: 0, height: 0 };
+let targetSize = { width: 0, height: 0, dpi: 254 };
+let selectedPreset = 'photoRealism';
+let fileInput: HTMLInputElement;
 
-  const presetList = Object.values(presets);
+const presetList = Object.values(presets);
 
-  function handleFile(file: File) {
-    normalizeImageFile(file)
-      .then(normalized => {
-        imageFile = normalized;
-        imageUrl = URL.createObjectURL(normalized);
-        loadImageSize(imageUrl);
-      })
-      .catch(() => {
-        imageFile = file;
-        imageUrl = URL.createObjectURL(file);
-        loadImageSize(imageUrl);
-      });
-  }
+function handleFile(file: File) {
+  normalizeImageFile(file)
+    .then(normalized => {
+      imageFile = normalized;
+      imageUrl = URL.createObjectURL(normalized);
+      loadImageSize(imageUrl);
+    })
+    .catch(() => {
+      imageFile = file;
+      imageUrl = URL.createObjectURL(file);
+      loadImageSize(imageUrl);
+    });
+}
 
-  function loadImageSize(url: string) {
-    const img = new Image();
-    img.onload = () => {
-      imageSize = { width: img.width, height: img.height };
-      targetSize = { width: img.width, height: img.height, dpi: 254 };
-      currentStep = 'resize';
-    };
-    img.src = url;
-  }
-
-  function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    const file = e.dataTransfer?.files[0];
-    if (file) handleFile(file);
-  }
-
-  function handleInputChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      handleFile(file);
-      input.value = '';
-    }
-  }
-
-  function updateWidth(e: Event) {
-    const w = parseInt((e.target as HTMLInputElement).value) || 0;
-    if (imageSize.width === 0 || imageSize.height === 0) {
-      targetSize.width = w;
-      return;
-    }
-    const h = Math.round(w / (imageSize.width / imageSize.height));
-    targetSize = { ...targetSize, width: w, height: h };
-  }
-
-  function updateHeight(e: Event) {
-    const h = parseInt((e.target as HTMLInputElement).value) || 0;
-    const w = Math.round(h * (imageSize.width / imageSize.height));
-    targetSize = { ...targetSize, width: w, height: h };
-  }
-
-  async function processImage() {
-    if (!imageFile || !imageUrl) return;
-    isProcessing = true;
-
-    try {
-      const img = new Image();
-      img.src = imageUrl;
-      await new Promise(resolve => (img.onload = resolve));
-
-      const canvas = document.createElement('canvas');
-      canvas.width = targetSize.width;
-      canvas.height = targetSize.height;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0, targetSize.width, targetSize.height);
-      const imageData = ctx.getImageData(
-        0,
-        0,
-        targetSize.width,
-        targetSize.height,
-      );
-
-      const processingData = {
-        width: imageData.width,
-        height: imageData.height,
-        data: imageData.data,
-      };
-
-      const result = applyPreset(processingData, selectedPreset);
-
-      const resultImageData = new ImageData(
-        sanitizeRgbaForExport(result.data),
-        result.width,
-        result.height,
-      );
-      ctx.putImageData(resultImageData, 0, 0);
-      processedUrl = canvas.toDataURL('image/png');
-      currentStep = 'download';
-    } catch (error) {
-      console.error('Processing error:', error);
-    } finally {
-      isProcessing = false;
-    }
-  }
-
-  function downloadImage() {
-    if (!processedUrl) return;
-    const link = document.createElement('a');
-    link.download = 'dither-and-etch-ready.png';
-    link.href = processedUrl;
-    link.click();
-  }
-
-  function reset() {
-    processedUrl = null;
-    isProcessing = false;
-    targetSize = {
-      width: imageSize.width,
-      height: imageSize.height,
-      dpi: 254,
-    };
+function loadImageSize(url: string) {
+  const img = new Image();
+  img.onload = () => {
+    imageSize = { width: img.width, height: img.height };
+    targetSize = { width: img.width, height: img.height, dpi: 254 };
     currentStep = 'resize';
-    selectedPreset = 'photoRealism';
-  }
+  };
+  img.src = url;
+}
 
-  function changeImage() {
-    imageFile = null;
-    imageUrl = null;
-    processedUrl = null;
+function handleDrop(e: DragEvent) {
+  e.preventDefault();
+  const file = e.dataTransfer?.files[0];
+  if (file) handleFile(file);
+}
+
+function handleInputChange(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (file) {
+    handleFile(file);
+    input.value = '';
+  }
+}
+
+function updateWidth(e: Event) {
+  const w = parseInt((e.target as HTMLInputElement).value, 10) || 0;
+  if (imageSize.width === 0 || imageSize.height === 0) {
+    targetSize.width = w;
+    return;
+  }
+  const h = Math.round(w / (imageSize.width / imageSize.height));
+  targetSize = { ...targetSize, width: w, height: h };
+}
+
+function updateHeight(e: Event) {
+  const h = parseInt((e.target as HTMLInputElement).value, 10) || 0;
+  const w = Math.round(h * (imageSize.width / imageSize.height));
+  targetSize = { ...targetSize, width: w, height: h };
+}
+
+async function processImage() {
+  if (!imageFile || !imageUrl) return;
+  isProcessing = true;
+
+  try {
+    const img = new Image();
+    img.src = imageUrl;
+    await new Promise(resolve => (img.onload = resolve));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetSize.width;
+    canvas.height = targetSize.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0, targetSize.width, targetSize.height);
+    const imageData = ctx.getImageData(
+      0,
+      0,
+      targetSize.width,
+      targetSize.height,
+    );
+
+    const processingData = {
+      width: imageData.width,
+      height: imageData.height,
+      data: imageData.data,
+    };
+
+    const result = applyPreset(processingData, selectedPreset);
+
+    const resultImageData = new ImageData(
+      sanitizeRgbaForExport(result.data),
+      result.width,
+      result.height,
+    );
+    ctx.putImageData(resultImageData, 0, 0);
+    processedUrl = canvas.toDataURL('image/png');
+    currentStep = 'download';
+  } catch (error) {
+    console.error('Processing error:', error);
+  } finally {
     isProcessing = false;
-    imageSize = { width: 0, height: 0 };
-    targetSize = { width: 0, height: 0, dpi: 254 };
-    currentStep = 'upload';
-    selectedPreset = 'photoRealism';
-    requestAnimationFrame(() => fileInput?.click());
   }
+}
 
-  $: physicalWidth = ((targetSize.width / targetSize.dpi) * 25.4).toFixed(1);
-  $: physicalHeight = ((targetSize.height / targetSize.dpi) * 25.4).toFixed(1);
-  $: currentPreset = presets[selectedPreset];
+function downloadImage() {
+  if (!processedUrl) return;
+  const link = document.createElement('a');
+  link.download = 'dither-and-etch-ready.png';
+  link.href = processedUrl;
+  link.click();
+}
+
+function reset() {
+  processedUrl = null;
+  isProcessing = false;
+  targetSize = {
+    width: imageSize.width,
+    height: imageSize.height,
+    dpi: 254,
+  };
+  currentStep = 'resize';
+  selectedPreset = 'photoRealism';
+}
+
+function changeImage() {
+  imageFile = null;
+  imageUrl = null;
+  processedUrl = null;
+  isProcessing = false;
+  imageSize = { width: 0, height: 0 };
+  targetSize = { width: 0, height: 0, dpi: 254 };
+  currentStep = 'upload';
+  selectedPreset = 'photoRealism';
+  requestAnimationFrame(() => fileInput?.click());
+}
+
+$: physicalWidth = ((targetSize.width / targetSize.dpi) * 25.4).toFixed(1);
+$: physicalHeight = ((targetSize.height / targetSize.dpi) * 25.4).toFixed(1);
+$: currentPreset = presets[selectedPreset];
 </script>
 
 <div class="mx-auto max-w-6xl">
@@ -164,7 +164,7 @@
     accept={IMAGE_ACCEPT}
     on:change={handleInputChange}
     class="hidden"
-  />
+  >
 
   <!-- Step Indicator -->
   {#if imageUrl}
@@ -285,7 +285,8 @@
               </button>
             </div>
             <div class="text-sm text-ink-muted">
-              {imageSize.width} × {imageSize.height}px
+              {imageSize.width}
+              × {imageSize.height}px
             </div>
           </div>
 
@@ -297,7 +298,7 @@
               src={processedUrl || imageUrl}
               alt="Preview"
               class="max-h-full max-w-full object-contain"
-            />
+            >
           </div>
 
           {#if processedUrl}
@@ -310,7 +311,7 @@
                       src={imageUrl}
                       alt="Original"
                       class="h-full w-full object-contain"
-                    />
+                    >
                   </div>
                 </div>
                 <div>
@@ -323,7 +324,7 @@
                       src={processedUrl}
                       alt="Processed"
                       class="h-full w-full object-contain"
-                    />
+                    >
                   </div>
                 </div>
               </div>
@@ -371,7 +372,7 @@
                   value={targetSize.width}
                   on:input={updateWidth}
                   class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                />
+                >
               </div>
               <div>
                 <label for="height-input" class="text-xs text-ink-muted"
@@ -383,7 +384,7 @@
                   value={targetSize.height}
                   on:input={updateHeight}
                   class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
-                />
+                >
               </div>
             </div>
             <div>
@@ -394,17 +395,16 @@
                 class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
               >
                 {#each dpiOptions as opt}
-                  <option value={opt.value}
-                    >{opt.label} (dot: {opt.dotSize})</option
-                  >
+                  <option value={opt.value}>
+                    {opt.label}
+                    (dot: {opt.dotSize})
+                  </option>
                 {/each}
               </select>
             </div>
             <div class="rounded-lg bg-surface p-3 text-sm">
               <p class="text-ink-muted">Physical size:</p>
-              <p class="font-mono">
-                {physicalWidth}mm × {physicalHeight}mm
-              </p>
+              <p class="font-mono">{physicalWidth}mm × {physicalHeight}mm</p>
             </div>
             <button
               on:click={() => (currentStep = 'preset')}
@@ -543,7 +543,8 @@
           result.
         </p>
         <p class="mt-2 text-xs text-ink-muted">
-          <strong>100% private</strong> — processing happens in your browser.
+          <strong>100% private</strong>
+          — processing happens in your browser.
         </p>
       </div>
     </div>

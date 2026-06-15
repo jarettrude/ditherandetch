@@ -25,13 +25,12 @@ const posts = allPosts.sort(
         </p>
       </header>
 
-      {
-        posts.length > 0 ?
+      {posts.length > 0 ?
           <div class="grid gap-8">
             {posts.map(post => (
               <article class="group">
                 <a
-                  href={`/journal/${post.id.replace('.md', '').replace('.mdx', '')}`}
+                  href={`/journal/${post.id.replace('.md', '').replace('.mdx', '')}/`}
                   class="block rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40 sm:p-8"
                 >
                   <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -70,12 +69,11 @@ const posts = allPosts.sort(
               lessons learned along the way. They're coming soon.
             </p>
             <p class="mt-6">
-              <a href="/gallery" class="text-accent hover:text-accent-hover">
+              <a href="/gallery/" class="text-accent hover:text-accent-hover">
                 Check out the gallery →
               </a>
             </p>
-          </div>
-      }
+          </div>}
     </div>
   </div>
 </Layout>

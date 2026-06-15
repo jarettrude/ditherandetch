@@ -62,8 +62,7 @@ const socialLinks = [
         </div>
 
         <div class="flex items-center gap-4">
-          {
-            socialLinks.map(link => (
+          {socialLinks.map(link => (
               <a
                 href={link.href}
                 target="_blank"
@@ -73,8 +72,7 @@ const socialLinks = [
               >
                 <SocialIcon name={link.icon} class="h-5 w-5" />
               </a>
-            ))
-          }
+            ))}
         </div>
       </div>
     </div>

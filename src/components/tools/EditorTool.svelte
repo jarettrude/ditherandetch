@@ -1,223 +1,223 @@
 <script lang="ts">
-  import { normalizeImageFile, IMAGE_ACCEPT } from '../../lib/imageFiles';
-  import * as adjustments from '../../lib/imageProcessing/adjustments';
-  import { sanitizeRgbaForExport } from '../../lib/imageProcessing/alpha';
-  import type { ProcessingImageData } from '../../lib/imageProcessing/types';
+import { IMAGE_ACCEPT, normalizeImageFile } from '../../lib/imageFiles';
+import * as adjustments from '../../lib/imageProcessing/adjustments';
+import { sanitizeRgbaForExport } from '../../lib/imageProcessing/alpha';
+import type { ProcessingImageData } from '../../lib/imageProcessing/types';
 
-  let imageFile: File | null = null;
-  let imageUrl: string | null = null;
-  let processedUrl: string | null = null;
-  let isProcessing = false;
-  let imageSize = { width: 0, height: 0 };
-  let fileInput: HTMLInputElement;
-  let errorMessage = '';
-  let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-  let cachedImageData: ImageData | null = null;
+let imageFile: File | null = null;
+let imageUrl: string | null = null;
+let processedUrl: string | null = null;
+let isProcessing = false;
+let imageSize = { width: 0, height: 0 };
+let fileInput: HTMLInputElement;
+let errorMessage = '';
+let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let cachedImageData: ImageData | null = null;
 
-  let brightness = 0;
-  let contrast = 0;
-  let gamma = 1.0;
-  let sharpen = 0;
-  let invert = false;
-  let mirror = false;
+let brightness = 0;
+let contrast = 0;
+let gamma = 1.0;
+let sharpen = 0;
+let invert = false;
+let mirror = false;
 
-  function handleFile(file: File) {
-    normalizeImageFile(file)
-      .then(normalized => {
-        imageFile = normalized;
-        imageUrl = URL.createObjectURL(normalized);
-        loadImageSize(imageUrl);
-      })
-      .catch(() => {
-        imageFile = file;
-        imageUrl = URL.createObjectURL(file);
-        loadImageSize(imageUrl);
-      });
+function handleFile(file: File) {
+  normalizeImageFile(file)
+    .then(normalized => {
+      imageFile = normalized;
+      imageUrl = URL.createObjectURL(normalized);
+      loadImageSize(imageUrl);
+    })
+    .catch(() => {
+      imageFile = file;
+      imageUrl = URL.createObjectURL(file);
+      loadImageSize(imageUrl);
+    });
+}
+
+async function loadImageSize(url: string) {
+  const img = new Image();
+  img.onload = async () => {
+    imageSize = { width: img.width, height: img.height };
+    processedUrl = null;
+
+    // Cache the image data for live preview
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0);
+    cachedImageData = ctx.getImageData(0, 0, img.width, img.height);
+  };
+  img.src = url;
+}
+
+function handleDrop(e: DragEvent) {
+  e.preventDefault();
+  const file = e.dataTransfer?.files[0];
+  if (file) handleFile(file);
+}
+
+function handleInputChange(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (file) {
+    handleFile(file);
+    input.value = '';
   }
+}
 
-  async function loadImageSize(url: string) {
-    const img = new Image();
-    img.onload = async () => {
-      imageSize = { width: img.width, height: img.height };
-      processedUrl = null;
+function updatePreview() {
+  if (previewDebounceTimer) {
+    clearTimeout(previewDebounceTimer);
+  }
+  previewDebounceTimer = setTimeout(() => {
+    generatePreview();
+  }, 50);
+}
 
-      // Cache the image data for live preview
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0);
-      cachedImageData = ctx.getImageData(0, 0, img.width, img.height);
+async function generatePreview() {
+  if (!cachedImageData) return;
+
+  try {
+    let result: ProcessingImageData = {
+      width: cachedImageData.width,
+      height: cachedImageData.height,
+      data: new Uint8ClampedArray(cachedImageData.data),
     };
-    img.src = url;
-  }
 
-  function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    const file = e.dataTransfer?.files[0];
-    if (file) handleFile(file);
-  }
-
-  function handleInputChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      handleFile(file);
-      input.value = '';
+    if (brightness !== 0) {
+      result = adjustments.adjustBrightness(result, brightness);
     }
-  }
-
-  function updatePreview() {
-    if (previewDebounceTimer) {
-      clearTimeout(previewDebounceTimer);
+    if (contrast !== 0) {
+      result = adjustments.adjustContrast(result, contrast);
     }
-    previewDebounceTimer = setTimeout(() => {
-      generatePreview();
-    }, 50);
-  }
-
-  async function generatePreview() {
-    if (!cachedImageData) return;
-
-    try {
-      let result: ProcessingImageData = {
-        width: cachedImageData.width,
-        height: cachedImageData.height,
-        data: new Uint8ClampedArray(cachedImageData.data),
-      };
-
-      if (brightness !== 0) {
-        result = adjustments.adjustBrightness(result, brightness);
-      }
-      if (contrast !== 0) {
-        result = adjustments.adjustContrast(result, contrast);
-      }
-      if (gamma !== 1.0) {
-        result = adjustments.adjustGamma(result, gamma);
-      }
-      // Skip sharpen for preview (expensive operation)
-      if (invert) {
-        result = adjustments.invert(result);
-      }
-      if (mirror) {
-        result = adjustments.mirrorHorizontal(result);
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = result.width;
-      canvas.height = result.height;
-      const ctx = canvas.getContext('2d')!;
-      const resultImageData = new ImageData(
-        sanitizeRgbaForExport(result.data),
-        result.width,
-        result.height,
-      );
-      ctx.putImageData(resultImageData, 0, 0);
-      processedUrl = canvas.toDataURL('image/png');
-    } catch (error) {
-      console.error('Preview error:', error);
+    if (gamma !== 1.0) {
+      result = adjustments.adjustGamma(result, gamma);
     }
+    // Skip sharpen for preview (expensive operation)
+    if (invert) {
+      result = adjustments.invert(result);
+    }
+    if (mirror) {
+      result = adjustments.mirrorHorizontal(result);
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = result.width;
+    canvas.height = result.height;
+    const ctx = canvas.getContext('2d')!;
+    const resultImageData = new ImageData(
+      sanitizeRgbaForExport(result.data),
+      result.width,
+      result.height,
+    );
+    ctx.putImageData(resultImageData, 0, 0);
+    processedUrl = canvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Preview error:', error);
   }
+}
 
-  async function applyAdjustments() {
-    if (!cachedImageData) return;
-    isProcessing = true;
-    errorMessage = '';
+async function applyAdjustments() {
+  if (!cachedImageData) return;
+  isProcessing = true;
+  errorMessage = '';
 
-    try {
-      let result: ProcessingImageData = {
-        width: cachedImageData.width,
-        height: cachedImageData.height,
-        data: new Uint8ClampedArray(cachedImageData.data),
-      };
+  try {
+    let result: ProcessingImageData = {
+      width: cachedImageData.width,
+      height: cachedImageData.height,
+      data: new Uint8ClampedArray(cachedImageData.data),
+    };
 
-      if (brightness !== 0) {
-        result = adjustments.adjustBrightness(result, brightness);
-      }
-      if (contrast !== 0) {
-        result = adjustments.adjustContrast(result, contrast);
-      }
-      if (gamma !== 1.0) {
-        result = adjustments.adjustGamma(result, gamma);
-      }
-      if (sharpen > 0) {
-        result = adjustments.unsharpMask(result, 1, sharpen);
-      }
-      if (invert) {
-        result = adjustments.invert(result);
-      }
-      if (mirror) {
-        result = adjustments.mirrorHorizontal(result);
-      }
+    if (brightness !== 0) {
+      result = adjustments.adjustBrightness(result, brightness);
+    }
+    if (contrast !== 0) {
+      result = adjustments.adjustContrast(result, contrast);
+    }
+    if (gamma !== 1.0) {
+      result = adjustments.adjustGamma(result, gamma);
+    }
+    if (sharpen > 0) {
+      result = adjustments.unsharpMask(result, 1, sharpen);
+    }
+    if (invert) {
+      result = adjustments.invert(result);
+    }
+    if (mirror) {
+      result = adjustments.mirrorHorizontal(result);
+    }
 
-      const canvas = document.createElement('canvas');
-      canvas.width = result.width;
-      canvas.height = result.height;
-      const ctx = canvas.getContext('2d')!;
-      const resultImageData = new ImageData(
-        sanitizeRgbaForExport(result.data),
-        result.width,
-        result.height,
-      );
-      ctx.putImageData(resultImageData, 0, 0);
-      processedUrl = canvas.toDataURL('image/png');
-    } catch (error) {
-      console.error('Processing error:', error);
-      errorMessage =
-        error instanceof Error ?
-          error.message
+    const canvas = document.createElement('canvas');
+    canvas.width = result.width;
+    canvas.height = result.height;
+    const ctx = canvas.getContext('2d')!;
+    const resultImageData = new ImageData(
+      sanitizeRgbaForExport(result.data),
+      result.width,
+      result.height,
+    );
+    ctx.putImageData(resultImageData, 0, 0);
+    processedUrl = canvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Processing error:', error);
+    errorMessage =
+      error instanceof Error
+        ? error.message
         : 'Failed to apply adjustments. Please try again.';
-    } finally {
-      isProcessing = false;
-    }
+  } finally {
+    isProcessing = false;
   }
+}
 
-  function downloadImage() {
-    if (!processedUrl) return;
-    const link = document.createElement('a');
-    link.download = 'edited-image.png';
-    link.href = processedUrl;
-    link.click();
-  }
+function downloadImage() {
+  if (!processedUrl) return;
+  const link = document.createElement('a');
+  link.download = 'edited-image.png';
+  link.href = processedUrl;
+  link.click();
+}
 
-  function reset() {
-    brightness = 0;
-    contrast = 0;
-    gamma = 1.0;
-    sharpen = 0;
-    invert = false;
-    mirror = false;
-    processedUrl = null;
-  }
+function reset() {
+  brightness = 0;
+  contrast = 0;
+  gamma = 1.0;
+  sharpen = 0;
+  invert = false;
+  mirror = false;
+  processedUrl = null;
+}
 
-  function changeImage() {
-    imageFile = null;
-    imageUrl = null;
-    processedUrl = null;
-    cachedImageData = null;
-    reset();
-    requestAnimationFrame(() => fileInput?.click());
-  }
+function changeImage() {
+  imageFile = null;
+  imageUrl = null;
+  processedUrl = null;
+  cachedImageData = null;
+  reset();
+  requestAnimationFrame(() => fileInput?.click());
+}
 
-  $: hasChanges =
-    brightness !== 0
-    || contrast !== 0
-    || gamma !== 1.0
-    || sharpen > 0
-    || invert
-    || mirror;
+$: hasChanges =
+  brightness !== 0 ||
+  contrast !== 0 ||
+  gamma !== 1.0 ||
+  sharpen > 0 ||
+  invert ||
+  mirror;
 
-  // Reactive live preview when settings change
-  $: if (
-    cachedImageData
-    && (brightness !== undefined
-      || contrast !== undefined
-      || gamma !== undefined
-      || invert !== undefined
-      || mirror !== undefined)
-  ) {
-    updatePreview();
-  }
+// Reactive live preview when settings change
+$: if (
+  cachedImageData &&
+  (brightness !== undefined ||
+    contrast !== undefined ||
+    gamma !== undefined ||
+    invert !== undefined ||
+    mirror !== undefined)
+) {
+  updatePreview();
+}
 </script>
 
 <div class="mx-auto max-w-6xl">
@@ -227,7 +227,7 @@
     accept={IMAGE_ACCEPT}
     on:change={handleInputChange}
     class="hidden"
-  />
+  >
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
     <!-- Main Content Area -->
@@ -314,7 +314,8 @@
               </button>
             </div>
             <div class="text-sm text-ink-muted">
-              {imageSize.width} × {imageSize.height}px
+              {imageSize.width}
+              × {imageSize.height}px
             </div>
           </div>
 
@@ -326,7 +327,7 @@
               src={processedUrl || imageUrl}
               alt="Preview"
               class="max-h-full max-w-full object-contain"
-            />
+            >
           </div>
 
           {#if processedUrl}
@@ -339,7 +340,7 @@
                       src={imageUrl}
                       alt="Original"
                       class="h-full w-full object-contain"
-                    />
+                    >
                   </div>
                 </div>
                 <div>
@@ -349,7 +350,7 @@
                       src={processedUrl}
                       alt="Edited"
                       class="h-full w-full object-contain"
-                    />
+                    >
                   </div>
                 </div>
               </div>
@@ -413,7 +414,7 @@
                 max="100"
                 bind:value={brightness}
                 class="mt-1 w-full accent-accent"
-              />
+              >
             </div>
             <div>
               <div class="flex items-center justify-between">
@@ -429,7 +430,7 @@
                 max="100"
                 bind:value={contrast}
                 class="mt-1 w-full accent-accent"
-              />
+              >
             </div>
             <div>
               <div class="flex items-center justify-between">
@@ -448,7 +449,7 @@
                 step="0.05"
                 bind:value={gamma}
                 class="mt-1 w-full accent-accent"
-              />
+              >
             </div>
             <div>
               <div class="flex items-center justify-between">
@@ -464,7 +465,7 @@
                 max="200"
                 bind:value={sharpen}
                 class="mt-1 w-full accent-accent"
-              />
+              >
             </div>
           </div>
         </div>
@@ -577,7 +578,8 @@
           brightness, contrast, gamma, and sharpness before dithering.
         </p>
         <p class="mt-2 text-xs text-ink-muted">
-          <strong>100% private</strong> — processing happens in your browser.
+          <strong>100% private</strong>
+          — processing happens in your browser.
         </p>
       </div>
     </div>

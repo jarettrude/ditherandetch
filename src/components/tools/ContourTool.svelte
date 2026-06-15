@@ -1,219 +1,219 @@
 <script lang="ts">
-  import { normalizeImageFile, IMAGE_ACCEPT } from '../../lib/imageFiles';
-  import {
-    extractContours,
-    cannyEdgeDetection,
-  } from '../../lib/imageProcessing/contour';
-  import { sanitizeRgbaForExport } from '../../lib/imageProcessing/alpha';
-  import type { ProcessingImageData } from '../../lib/imageProcessing/types';
+import { IMAGE_ACCEPT, normalizeImageFile } from '../../lib/imageFiles';
+import { sanitizeRgbaForExport } from '../../lib/imageProcessing/alpha';
+import {
+  cannyEdgeDetection,
+  extractContours,
+} from '../../lib/imageProcessing/contour';
+import type { ProcessingImageData } from '../../lib/imageProcessing/types';
 
-  let imageFile: File | null = null;
-  let imageUrl: string | null = null;
-  let processedUrl: string | null = null;
-  let isProcessing = false;
-  let imageSize = { width: 0, height: 0 };
-  let fileInput: HTMLInputElement;
-  let errorMessage = '';
-  let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-  let cachedImageData: ImageData | null = null;
+let imageFile: File | null = null;
+let imageUrl: string | null = null;
+let processedUrl: string | null = null;
+let isProcessing = false;
+let imageSize = { width: 0, height: 0 };
+let fileInput: HTMLInputElement;
+let errorMessage = '';
+let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let cachedImageData: ImageData | null = null;
 
-  let threshold = 128;
-  let lineThickness = 1;
-  let invertOutput = false;
-  let useCanny = false;
-  let cannyLow = 50;
-  let cannyHigh = 150;
+let threshold = 128;
+let lineThickness = 1;
+let invertOutput = false;
+let useCanny = false;
+let cannyLow = 50;
+let cannyHigh = 150;
 
-  function handleFile(file: File) {
-    normalizeImageFile(file)
-      .then(normalized => {
-        imageFile = normalized;
-        imageUrl = URL.createObjectURL(normalized);
-        loadImageSize(imageUrl);
-      })
-      .catch(() => {
-        imageFile = file;
-        imageUrl = URL.createObjectURL(file);
-        loadImageSize(imageUrl);
-      });
+function handleFile(file: File) {
+  normalizeImageFile(file)
+    .then(normalized => {
+      imageFile = normalized;
+      imageUrl = URL.createObjectURL(normalized);
+      loadImageSize(imageUrl);
+    })
+    .catch(() => {
+      imageFile = file;
+      imageUrl = URL.createObjectURL(file);
+      loadImageSize(imageUrl);
+    });
+}
+
+async function loadImageSize(url: string) {
+  const img = new Image();
+  img.onload = async () => {
+    imageSize = { width: img.width, height: img.height };
+    processedUrl = null;
+
+    // Cache the image data for live preview
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0);
+    cachedImageData = ctx.getImageData(0, 0, img.width, img.height);
+
+    // Generate initial preview
+    updatePreview();
+  };
+  img.src = url;
+}
+
+function handleDrop(e: DragEvent) {
+  e.preventDefault();
+  const file = e.dataTransfer?.files[0];
+  if (file) handleFile(file);
+}
+
+function handleInputChange(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (file) {
+    handleFile(file);
+    input.value = '';
   }
+}
 
-  async function loadImageSize(url: string) {
-    const img = new Image();
-    img.onload = async () => {
-      imageSize = { width: img.width, height: img.height };
-      processedUrl = null;
+function updatePreview() {
+  if (previewDebounceTimer) {
+    clearTimeout(previewDebounceTimer);
+  }
+  previewDebounceTimer = setTimeout(() => {
+    generatePreview();
+  }, 100);
+}
 
-      // Cache the image data for live preview
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d')!;
-      ctx.drawImage(img, 0, 0);
-      cachedImageData = ctx.getImageData(0, 0, img.width, img.height);
+async function generatePreview() {
+  if (!cachedImageData) return;
 
-      // Generate initial preview
-      updatePreview();
+  try {
+    const inputData: ProcessingImageData = {
+      width: cachedImageData.width,
+      height: cachedImageData.height,
+      data: new Uint8ClampedArray(cachedImageData.data),
     };
-    img.src = url;
-  }
 
-  function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    const file = e.dataTransfer?.files[0];
-    if (file) handleFile(file);
-  }
-
-  function handleInputChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      handleFile(file);
-      input.value = '';
+    let result: ProcessingImageData;
+    if (useCanny) {
+      result = cannyEdgeDetection(inputData, cannyLow, cannyHigh);
+    } else {
+      result = extractContours(inputData, threshold);
     }
-  }
 
-  function updatePreview() {
-    if (previewDebounceTimer) {
-      clearTimeout(previewDebounceTimer);
+    // Invert if requested
+    if (invertOutput) {
+      for (let i = 0; i < result.data.length; i += 4) {
+        result.data[i] = 255 - result.data[i];
+        result.data[i + 1] = 255 - result.data[i + 1];
+        result.data[i + 2] = 255 - result.data[i + 2];
+      }
     }
-    previewDebounceTimer = setTimeout(() => {
-      generatePreview();
-    }, 100);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = result.width;
+    canvas.height = result.height;
+    const ctx = canvas.getContext('2d')!;
+    const resultImageData = new ImageData(
+      sanitizeRgbaForExport(result.data),
+      result.width,
+      result.height,
+    );
+    ctx.putImageData(resultImageData, 0, 0);
+    processedUrl = canvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Preview error:', error);
   }
+}
 
-  async function generatePreview() {
-    if (!cachedImageData) return;
+async function extractEdges() {
+  if (!cachedImageData) return;
+  isProcessing = true;
+  errorMessage = '';
 
-    try {
-      const inputData: ProcessingImageData = {
-        width: cachedImageData.width,
-        height: cachedImageData.height,
-        data: new Uint8ClampedArray(cachedImageData.data),
-      };
+  try {
+    const inputData: ProcessingImageData = {
+      width: cachedImageData.width,
+      height: cachedImageData.height,
+      data: new Uint8ClampedArray(cachedImageData.data),
+    };
 
-      let result: ProcessingImageData;
-      if (useCanny) {
-        result = cannyEdgeDetection(inputData, cannyLow, cannyHigh);
-      } else {
-        result = extractContours(inputData, threshold);
-      }
-
-      // Invert if requested
-      if (invertOutput) {
-        for (let i = 0; i < result.data.length; i += 4) {
-          result.data[i] = 255 - result.data[i];
-          result.data[i + 1] = 255 - result.data[i + 1];
-          result.data[i + 2] = 255 - result.data[i + 2];
-        }
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = result.width;
-      canvas.height = result.height;
-      const ctx = canvas.getContext('2d')!;
-      const resultImageData = new ImageData(
-        sanitizeRgbaForExport(result.data),
-        result.width,
-        result.height,
-      );
-      ctx.putImageData(resultImageData, 0, 0);
-      processedUrl = canvas.toDataURL('image/png');
-    } catch (error) {
-      console.error('Preview error:', error);
+    let result: ProcessingImageData;
+    if (useCanny) {
+      result = cannyEdgeDetection(inputData, cannyLow, cannyHigh);
+    } else {
+      result = extractContours(inputData, threshold);
     }
-  }
 
-  async function extractEdges() {
-    if (!cachedImageData) return;
-    isProcessing = true;
-    errorMessage = '';
-
-    try {
-      const inputData: ProcessingImageData = {
-        width: cachedImageData.width,
-        height: cachedImageData.height,
-        data: new Uint8ClampedArray(cachedImageData.data),
-      };
-
-      let result: ProcessingImageData;
-      if (useCanny) {
-        result = cannyEdgeDetection(inputData, cannyLow, cannyHigh);
-      } else {
-        result = extractContours(inputData, threshold);
+    // Invert if requested
+    if (invertOutput) {
+      for (let i = 0; i < result.data.length; i += 4) {
+        result.data[i] = 255 - result.data[i];
+        result.data[i + 1] = 255 - result.data[i + 1];
+        result.data[i + 2] = 255 - result.data[i + 2];
       }
+    }
 
-      // Invert if requested
-      if (invertOutput) {
-        for (let i = 0; i < result.data.length; i += 4) {
-          result.data[i] = 255 - result.data[i];
-          result.data[i + 1] = 255 - result.data[i + 1];
-          result.data[i + 2] = 255 - result.data[i + 2];
-        }
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = result.width;
-      canvas.height = result.height;
-      const ctx = canvas.getContext('2d')!;
-      const resultImageData = new ImageData(
-        sanitizeRgbaForExport(result.data),
-        result.width,
-        result.height,
-      );
-      ctx.putImageData(resultImageData, 0, 0);
-      processedUrl = canvas.toDataURL('image/png');
-    } catch (error) {
-      console.error('Contour error:', error);
-      errorMessage =
-        error instanceof Error ?
-          error.message
+    const canvas = document.createElement('canvas');
+    canvas.width = result.width;
+    canvas.height = result.height;
+    const ctx = canvas.getContext('2d')!;
+    const resultImageData = new ImageData(
+      sanitizeRgbaForExport(result.data),
+      result.width,
+      result.height,
+    );
+    ctx.putImageData(resultImageData, 0, 0);
+    processedUrl = canvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Contour error:', error);
+    errorMessage =
+      error instanceof Error
+        ? error.message
         : 'Failed to extract contours. Please try again.';
-    } finally {
-      isProcessing = false;
-    }
+  } finally {
+    isProcessing = false;
   }
+}
 
-  function downloadImage() {
-    if (!processedUrl) return;
-    const link = document.createElement('a');
-    link.download = 'contour-image.png';
-    link.href = processedUrl;
-    link.click();
-  }
+function downloadImage() {
+  if (!processedUrl) return;
+  const link = document.createElement('a');
+  link.download = 'contour-image.png';
+  link.href = processedUrl;
+  link.click();
+}
 
-  function changeImage() {
-    imageFile = null;
-    imageUrl = null;
-    processedUrl = null;
-    cachedImageData = null;
-    requestAnimationFrame(() => fileInput?.click());
-  }
+function changeImage() {
+  imageFile = null;
+  imageUrl = null;
+  processedUrl = null;
+  cachedImageData = null;
+  requestAnimationFrame(() => fileInput?.click());
+}
 
-  function reset() {
-    threshold = 128;
-    lineThickness = 1;
-    invertOutput = false;
-    useCanny = false;
-    cannyLow = 50;
-    cannyHigh = 150;
-    processedUrl = null;
-    if (cachedImageData) {
-      updatePreview();
-    }
-  }
-
-  // Reactive live preview when settings change
-  $: if (
-    cachedImageData
-    && (threshold
-      || useCanny !== undefined
-      || cannyLow
-      || cannyHigh
-      || invertOutput !== undefined)
-  ) {
+function reset() {
+  threshold = 128;
+  lineThickness = 1;
+  invertOutput = false;
+  useCanny = false;
+  cannyLow = 50;
+  cannyHigh = 150;
+  processedUrl = null;
+  if (cachedImageData) {
     updatePreview();
   }
+}
+
+// Reactive live preview when settings change
+$: if (
+  cachedImageData &&
+  (threshold ||
+    useCanny !== undefined ||
+    cannyLow ||
+    cannyHigh ||
+    invertOutput !== undefined)
+) {
+  updatePreview();
+}
 </script>
 
 <div class="mx-auto max-w-6xl">
@@ -223,7 +223,7 @@
     accept={IMAGE_ACCEPT}
     on:change={handleInputChange}
     class="hidden"
-  />
+  >
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
     <!-- Main Content Area -->
@@ -309,7 +309,8 @@
               </button>
             </div>
             <div class="text-sm text-ink-muted">
-              {imageSize.width} × {imageSize.height}px
+              {imageSize.width}
+              × {imageSize.height}px
             </div>
           </div>
 
@@ -321,7 +322,7 @@
               src={processedUrl || imageUrl}
               alt="Preview"
               class="max-h-full max-w-full object-contain"
-            />
+            >
           </div>
 
           {#if processedUrl}
@@ -334,7 +335,7 @@
                       src={imageUrl}
                       alt="Original"
                       class="h-full w-full object-contain"
-                    />
+                    >
                   </div>
                 </div>
                 <div>
@@ -346,7 +347,7 @@
                       src={processedUrl}
                       alt="Contours"
                       class="h-full w-full object-contain"
-                    />
+                    >
                   </div>
                 </div>
               </div>
@@ -449,7 +450,7 @@
                   max="100"
                   bind:value={cannyLow}
                   class="mt-1 w-full accent-accent"
-                />
+                >
               </div>
               <div>
                 <div class="flex items-center justify-between">
@@ -467,7 +468,7 @@
                   max="255"
                   bind:value={cannyHigh}
                   class="mt-1 w-full accent-accent"
-                />
+                >
               </div>
             {:else}
               <div>
@@ -486,7 +487,7 @@
                   max="255"
                   bind:value={threshold}
                   class="mt-1 w-full accent-accent"
-                />
+                >
               </div>
             {/if}
             <button
@@ -534,7 +535,8 @@
           Simple mode for basic edges or Canny for more precise detection.
         </p>
         <p class="mt-2 text-xs text-ink-muted">
-          <strong>100% private</strong> — processing happens in your browser.
+          <strong>100% private</strong>
+          — processing happens in your browser.
         </p>
       </div>
     </div>

@@ -40,9 +40,9 @@ export function initThemeToggle() {
   themeToggles.forEach(btn => {
     btn.addEventListener('click', () => {
       const current: Theme =
-        document.documentElement.getAttribute('data-theme') === 'dark' ?
-          'dark'
-        : 'light';
+        document.documentElement.getAttribute('data-theme') === 'dark'
+          ? 'dark'
+          : 'light';
       applyTheme(current === 'dark' ? 'light' : 'dark');
     });
   });

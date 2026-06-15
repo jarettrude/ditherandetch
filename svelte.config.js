@@ -5,6 +5,6 @@ export default {
   // for more information about preprocessors.
   preprocess: vitePreprocess(),
   compilerOptions: {
-    dev: process.env.NODE_ENV !== 'production'
-  }
+    dev: process.env.NODE_ENV !== 'production',
+  },
 };

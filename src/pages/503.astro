@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
 import Icon from '../components/global/Icon.astro';
+import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout
@@ -28,6 +28,7 @@ import Icon from '../components/global/Icon.astro';
         class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
       >
         <button
+          type="button"
           onclick="window.location.reload()"
           class="btn btn-primary"
           aria-label="Refresh and try again"
@@ -68,10 +69,12 @@ import Icon from '../components/global/Icon.astro';
 
       <div class="mt-8 pt-8 border-t border-border">
         <p class="text-sm text-ink-faint">
-          If the issue persists, please <a
+          If the issue persists, please
+          <a
             href="mailto:hello@ditherandetch.ca"
             class="text-accent hover:underline"
-            aria-label="contact us via email">contact us</a
+            aria-label="contact us via email"
+            >contact us</a
           >.
         </p>
       </div>

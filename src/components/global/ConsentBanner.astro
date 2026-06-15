@@ -26,7 +26,7 @@
           We use privacy-focused analytics to understand how visitors use this
           site.
           <a
-            href="/privacy"
+            href="/privacy/"
             class="inline-block py-1 text-accent underline-offset-2 hover:text-accent-hover"
           >
             Read our privacy policy
@@ -54,67 +54,67 @@
 </div>
 
 <script>
-  const STORAGE_KEY = 'analytics-consent';
-  const BANNER_SHOWN_KEY = 'consent-banner-shown';
+const STORAGE_KEY = 'analytics-consent';
+const BANNER_SHOWN_KEY = 'consent-banner-shown';
 
-  function initConsentBanner() {
-    const banner = document.getElementById('consent-banner');
-    const acceptBtn = document.getElementById('consent-accept');
-    const declineBtn = document.getElementById('consent-decline');
+function initConsentBanner() {
+  const banner = document.getElementById('consent-banner');
+  const acceptBtn = document.getElementById('consent-accept');
+  const declineBtn = document.getElementById('consent-decline');
 
-    if (!banner || !acceptBtn || !declineBtn) return;
+  if (!banner || !acceptBtn || !declineBtn) return;
 
-    // Check if user has already made a choice
-    const hasConsent = localStorage.getItem(STORAGE_KEY);
-    const bannerShown = localStorage.getItem(BANNER_SHOWN_KEY);
+  // Check if user has already made a choice
+  const hasConsent = localStorage.getItem(STORAGE_KEY);
+  const bannerShown = localStorage.getItem(BANNER_SHOWN_KEY);
 
-    // Only show banner if no preference has been set
-    if (hasConsent === null && bannerShown !== 'true') {
-      // Small delay for better UX - let page load first
-      setTimeout(() => {
-        banner.classList.remove('hidden');
-        // Trigger animation
-        requestAnimationFrame(() => {
-          banner!.classList.remove('translate-y-full');
-        });
-      }, 1000);
-    }
-
-    function hideBanner() {
-      banner!.classList.add('translate-y-full');
-      setTimeout(() => {
-        banner!.classList.add('hidden');
-      }, 300);
-    }
-
-    function setConsent(enabled: boolean) {
-      localStorage.setItem(STORAGE_KEY, String(enabled));
-      localStorage.setItem(BANNER_SHOWN_KEY, 'true');
-      hideBanner();
-
-      // Dispatch event for analytics script
-      window.dispatchEvent(
-        new CustomEvent('analytics-consent-change', {
-          detail: { enabled },
-        }),
-      );
-
-      // If declining, disable Umami tracking
-      if (!enabled) {
-        // Umami respects localStorage disable flag
-        localStorage.setItem('umami.disabled', '1');
-      } else {
-        localStorage.removeItem('umami.disabled');
-      }
-    }
-
-    acceptBtn.addEventListener('click', () => setConsent(true));
-    declineBtn.addEventListener('click', () => setConsent(false));
+  // Only show banner if no preference has been set
+  if (hasConsent === null && bannerShown !== 'true') {
+    // Small delay for better UX - let page load first
+    setTimeout(() => {
+      banner.classList.remove('hidden');
+      // Trigger animation
+      requestAnimationFrame(() => {
+        banner!.classList.remove('translate-y-full');
+      });
+    }, 1000);
   }
 
-  // Initialize on page load
-  initConsentBanner();
+  function hideBanner() {
+    banner!.classList.add('translate-y-full');
+    setTimeout(() => {
+      banner!.classList.add('hidden');
+    }, 300);
+  }
 
-  // Re-initialize after Astro page transitions
-  document.addEventListener('astro:after-swap', initConsentBanner);
+  function setConsent(enabled: boolean) {
+    localStorage.setItem(STORAGE_KEY, String(enabled));
+    localStorage.setItem(BANNER_SHOWN_KEY, 'true');
+    hideBanner();
+
+    // Dispatch event for analytics script
+    window.dispatchEvent(
+      new CustomEvent('analytics-consent-change', {
+        detail: { enabled },
+      }),
+    );
+
+    // If declining, disable Umami tracking
+    if (!enabled) {
+      // Umami respects localStorage disable flag
+      localStorage.setItem('umami.disabled', '1');
+    } else {
+      localStorage.removeItem('umami.disabled');
+    }
+  }
+
+  acceptBtn.addEventListener('click', () => setConsent(true));
+  declineBtn.addEventListener('click', () => setConsent(false));
+}
+
+// Initialize on page load
+initConsentBanner();
+
+// Re-initialize after Astro page transitions
+document.addEventListener('astro:after-swap', initConsentBanner);
 </script>

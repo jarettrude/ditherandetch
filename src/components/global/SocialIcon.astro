@@ -7,9 +7,8 @@ export interface Props {
 
 const { name, class: className = '', size } = Astro.props;
 
-const sizeStyle =
-  size ?
-    `width: ${typeof size === 'number' ? size + 'px' : size}; height: ${typeof size === 'number' ? size + 'px' : size};`
+const sizeStyle = size
+  ? `width: ${typeof size === 'number' ? size + 'px' : size}; height: ${typeof size === 'number' ? size + 'px' : size};`
   : '';
 ---
 

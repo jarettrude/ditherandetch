@@ -268,10 +268,10 @@ export function applyMask(
       let maskValue = 0;
 
       if (
-        maskX >= 0
-        && maskX < maskData.width
-        && maskY >= 0
-        && maskY < maskData.height
+        maskX >= 0 &&
+        maskX < maskData.width &&
+        maskY >= 0 &&
+        maskY < maskData.height
       ) {
         const maskIdx = (maskY * maskData.width + maskX) * 4;
         maskValue = maskData.data[maskIdx]!;

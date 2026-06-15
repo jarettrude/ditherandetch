@@ -25,7 +25,7 @@ const { Content } = await render(post);
       <!-- Header -->
       <header class="mb-12">
         <a
-          href="/journal"
+          href="/journal/"
           class="inline-flex items-center gap-2 text-sm text-ink-muted hover:text-accent"
         >
           <Icon name="arrow-left" class="h-4 w-4" />
@@ -45,13 +45,11 @@ const { Content } = await render(post);
             datetime={post.data.date.toISOString()}
             class="mt-4 block text-ink-muted"
           >
-            {
-              post.data.date.toLocaleDateString('en-US', {
+            {post.data.date.toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
-              })
-            }
+              })}
           </time>
         </div>
       </header>
@@ -64,7 +62,7 @@ const { Content } = await render(post);
       <!-- Footer -->
       <footer class="mt-16 border-t border-border pt-8">
         <a
-          href="/journal"
+          href="/journal/"
           class="inline-flex items-center gap-2 text-accent hover:text-accent-hover"
         >
           <Icon name="arrow-left" class="h-4 w-4" />

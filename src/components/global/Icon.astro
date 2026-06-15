@@ -3,26 +3,21 @@ export interface Props {
   name: string;
   class?: string;
   size?: number | string;
-  'aria-hidden'?: boolean;
 }
 
-const {
-  name,
-  class: className = '',
-  size,
-  'aria-hidden': ariaHidden = true,
-} = Astro.props;
+const { name, class: className = '', size } = Astro.props;
 
-const sizeStyle =
-  size ?
-    `width: ${typeof size === 'number' ? size + 'px' : size}; height: ${typeof size === 'number' ? size + 'px' : size};`
+const sizeStyle = size
+  ? `width: ${typeof size === 'number' ? size + 'px' : size}; height: ${typeof size === 'number' ? size + 'px' : size};`
   : '';
 ---
 
 <svg
   class:list={['icon-stroke', className]}
   style={sizeStyle}
-  aria-hidden={ariaHidden}
+  aria-hidden="true"
+  role="img"
 >
+  <title>{name} icon</title>
   <use href={`#icon-${name}`}></use>
 </svg>

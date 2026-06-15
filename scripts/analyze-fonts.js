@@ -6,7 +6,7 @@
  * and suggests optimal font subsets.
  */
 
-import { readFileSync, readdirSync, statSync } from 'fs';
+import { readdirSync, readFileSync, statSync } from 'fs';
 import { extname, join } from 'path';
 
 const SOURCE_DIR = './src';

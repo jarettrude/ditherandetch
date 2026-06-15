@@ -56,9 +56,11 @@ export async function normalizeImageFile(
   });
 
   const ext =
-    heicOutputType === 'image/png' ? 'png'
-    : heicOutputType === 'image/webp' ? 'webp'
-    : 'jpg';
+    heicOutputType === 'image/png'
+      ? 'png'
+      : heicOutputType === 'image/webp'
+        ? 'webp'
+        : 'jpg';
 
   const baseName = file.name ? stripFileExtension(file.name) : 'image';
 

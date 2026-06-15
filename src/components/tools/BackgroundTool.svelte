@@ -1,111 +1,112 @@
 <script lang="ts">
-  import { normalizeImageFile, IMAGE_ACCEPT } from '../../lib/imageFiles';
+import { IMAGE_ACCEPT, normalizeImageFile } from '../../lib/imageFiles';
 
-  let imageFile: File | null = null;
-  let imageUrl: string | null = null;
-  let processedUrl: string | null = null;
-  let maskUrl: string | null = null;
-  let isProcessing = false;
-  let loadingProgress = 0;
-  let imageSize = { width: 0, height: 0 };
-  let fileInput: HTMLInputElement;
-  let showMask = false;
-  let errorMessage = '';
+let imageFile: File | null = null;
+let imageUrl: string | null = null;
+let processedUrl: string | null = null;
+let maskUrl: string | null = null;
+let isProcessing = false;
+let loadingProgress = 0;
+let imageSize = { width: 0, height: 0 };
+let fileInput: HTMLInputElement;
+let showMask = false;
+let errorMessage = '';
 
-  function handleFile(file: File) {
-    normalizeImageFile(file)
-      .then(normalized => {
-        imageFile = normalized;
-        imageUrl = URL.createObjectURL(normalized);
-        loadImageSize(imageUrl);
-      })
-      .catch(() => {
-        imageFile = file;
-        imageUrl = URL.createObjectURL(file);
-        loadImageSize(imageUrl);
-      });
+function handleFile(file: File) {
+  normalizeImageFile(file)
+    .then(normalized => {
+      imageFile = normalized;
+      imageUrl = URL.createObjectURL(normalized);
+      loadImageSize(imageUrl);
+    })
+    .catch(() => {
+      imageFile = file;
+      imageUrl = URL.createObjectURL(file);
+      loadImageSize(imageUrl);
+    });
+}
+
+function loadImageSize(url: string) {
+  const img = new Image();
+  img.onload = () => {
+    imageSize = { width: img.width, height: img.height };
+    processedUrl = null;
+    maskUrl = null;
+  };
+  img.src = url;
+}
+
+function handleDrop(e: DragEvent) {
+  e.preventDefault();
+  const file = e.dataTransfer?.files[0];
+  if (file) handleFile(file);
+}
+
+function handleInputChange(e: Event) {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (file) {
+    handleFile(file);
+    input.value = '';
   }
+}
 
-  function loadImageSize(url: string) {
-    const img = new Image();
-    img.onload = () => {
-      imageSize = { width: img.width, height: img.height };
-      processedUrl = null;
-      maskUrl = null;
-    };
-    img.src = url;
-  }
+async function removeBackground() {
+  if (!imageFile) return;
+  isProcessing = true;
+  loadingProgress = 0;
+  errorMessage = '';
 
-  function handleDrop(e: DragEvent) {
-    e.preventDefault();
-    const file = e.dataTransfer?.files[0];
-    if (file) handleFile(file);
-  }
+  try {
+    const { removeImageBackground, getBackgroundMask } = await import(
+      '../../lib/imageProcessing/backgroundRemoval'
+    );
 
-  function handleInputChange(e: Event) {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) {
-      handleFile(file);
-      input.value = '';
-    }
-  }
+    // Process sequentially to avoid memory issues
+    const resultBlob = await removeImageBackground(imageFile, {
+      onProgress: (p: number) => {
+        loadingProgress = p * 50;
+      },
+    });
 
-  async function removeBackground() {
-    if (!imageFile) return;
-    isProcessing = true;
-    loadingProgress = 0;
-    errorMessage = '';
+    const maskBlob = await getBackgroundMask(imageFile);
 
-    try {
-      const { removeImageBackground, getBackgroundMask } =
-        await import('../../lib/imageProcessing/backgroundRemoval');
-
-      // Process sequentially to avoid memory issues
-      const resultBlob = await removeImageBackground(imageFile, {
-        onProgress: (p: number) => {
-          loadingProgress = p * 50;
-        },
-      });
-
-      const maskBlob = await getBackgroundMask(imageFile);
-
-      processedUrl = URL.createObjectURL(resultBlob);
-      maskUrl = URL.createObjectURL(maskBlob);
-    } catch (error) {
-      console.error('Background removal error:', error);
-      errorMessage =
-        error instanceof Error ?
-          error.message
+    processedUrl = URL.createObjectURL(resultBlob);
+    maskUrl = URL.createObjectURL(maskBlob);
+  } catch (error) {
+    console.error('Background removal error:', error);
+    errorMessage =
+      error instanceof Error
+        ? error.message
         : 'Failed to remove background. Please try again.';
-    } finally {
-      isProcessing = false;
-      loadingProgress = 100;
-    }
+  } finally {
+    isProcessing = false;
+    loadingProgress = 100;
   }
+}
 
-  function downloadImage() {
-    if (!processedUrl) return;
-    const link = document.createElement('a');
-    link.download = 'background-removed.png';
-    link.href = processedUrl;
-    link.click();
-  }
+function downloadImage() {
+  if (!processedUrl) return;
+  const link = document.createElement('a');
+  link.download = 'background-removed.png';
+  link.href = processedUrl;
+  link.click();
+}
 
-  function changeImage() {
-    imageFile = null;
-    imageUrl = null;
-    processedUrl = null;
-    maskUrl = null;
-    showMask = false;
-    requestAnimationFrame(() => fileInput?.click());
-  }
+function changeImage() {
+  imageFile = null;
+  imageUrl = null;
+  processedUrl = null;
+  maskUrl = null;
+  showMask = false;
+  requestAnimationFrame(() => fileInput?.click());
+}
 
-  function reset() {
-    processedUrl = null;
-    maskUrl = null;
-    showMask = false;
-  }
+function reset() {
+  processedUrl = null;
+  maskUrl = null;
+  showMask = false;
+}
 </script>
 
 <div class="mx-auto max-w-6xl">
@@ -115,7 +116,7 @@
     accept={IMAGE_ACCEPT}
     on:change={handleInputChange}
     class="hidden"
-  />
+  >
 
   <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
     <!-- Main Content Area -->
@@ -202,7 +203,8 @@
               </button>
             </div>
             <div class="text-sm text-ink-muted">
-              {imageSize.width} × {imageSize.height}px
+              {imageSize.width}
+              × {imageSize.height}px
             </div>
           </div>
 
@@ -215,13 +217,13 @@
                 src={maskUrl}
                 alt="Mask"
                 class="max-h-full max-w-full object-contain"
-              />
+              >
             {:else}
               <img
                 src={processedUrl || imageUrl}
                 alt="Preview"
                 class="max-h-full max-w-full object-contain"
-              />
+              >
             {/if}
           </div>
 
@@ -341,11 +343,12 @@
           like hair and fur with high accuracy.
         </p>
         <p class="mt-2 text-xs text-ink-muted">
-          <strong>First use:</strong> The AI model (~180MB) downloads once and runs
-          locally.
+          <strong>First use:</strong>
+          The AI model (~180MB) downloads once and runs locally.
         </p>
         <p class="mt-2 text-xs text-ink-muted">
-          <strong>100% private</strong> — processing happens in your browser.
+          <strong>100% private</strong>
+          — processing happens in your browser.
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 ---
-import Layout from '../layouts/Layout.astro';
 import Icon from '../components/global/Icon.astro';
+import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout
@@ -37,6 +37,7 @@ import Icon from '../components/global/Icon.astro';
         </a>
 
         <button
+          type="button"
           onclick="window.history.back()"
           class="inline-flex items-center gap-2 px-6 py-3 border border-accent text-accent rounded-lg font-medium hover:bg-accent hover:text-surface transition-colors"
           aria-label="Previous Page"
@@ -68,10 +69,12 @@ import Icon from '../components/global/Icon.astro';
 
       <div class="mt-8 pt-8 border-t border-border">
         <p class="text-sm text-ink-faint">
-          If this problem continues, please <a
+          If this problem continues, please
+          <a
             href="mailto:studio@ditherandetch.ca"
             class="text-accent underline hover:no-underline"
-            aria-label="report the issue via email">report the issue</a
+            aria-label="report the issue via email"
+            >report the issue</a
           >.
         </p>
       </div>

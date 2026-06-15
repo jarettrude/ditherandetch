@@ -1,0 +1,3 @@
+# Security contact for Dither & Etch
+Contact: mailto:hello@ditherandetch.ca
+Preferred-Languages: en

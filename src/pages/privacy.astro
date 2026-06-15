@@ -43,10 +43,9 @@ import Layout from '../layouts/Layout.astro';
 
         <h3>Analytics Data</h3>
         <p>
-          We use <a
-            href="https://umami.is"
-            target="_blank"
-            rel="noopener noreferrer">Umami</a
+          We use
+          <a href="https://umami.is" target="_blank" rel="noopener noreferrer"
+            >Umami</a
           >, a privacy-focused, self-hosted analytics platform. Umami is
           designed to be GDPR and PIPEDA compliant by default.
         </p>
@@ -97,9 +96,9 @@ import Layout from '../layouts/Layout.astro';
         <h3>Browser-Based Tools</h3>
         <p>
           Our free image processing tools (dithering, background removal, etc.)
-          run entirely in your browser using WebAssembly. <strong
-            >Your images are never uploaded to our servers.</strong
-          > All processing happens locally on your device.
+          run entirely in your browser using WebAssembly.
+          <strong>Your images are never uploaded to our servers.</strong>
+          All processing happens locally on your device.
         </p>
       </section>
 
@@ -107,15 +106,16 @@ import Layout from '../layouts/Layout.astro';
         <h2>How We Use Information</h2>
         <ul>
           <li>
-            <strong>Analytics:</strong> To understand site usage and improve the user
-            experience
+            <strong>Analytics:</strong>
+            To understand site usage and improve the user experience
           </li>
           <li>
-            <strong>Communications:</strong> To respond to inquiries and discuss commissions
+            <strong>Communications:</strong>
+            To respond to inquiries and discuss commissions
           </li>
           <li>
-            <strong>Commissions:</strong> To create, deliver, and follow up on custom
-            work
+            <strong>Commissions:</strong>
+            To create, deliver, and follow up on custom work
           </li>
         </ul>
       </section>
@@ -169,16 +169,18 @@ import Layout from '../layouts/Layout.astro';
         <h2>Data Retention</h2>
         <ul>
           <li>
-            <strong>Analytics:</strong> Aggregated, anonymized data is retained indefinitely
-            for trend analysis
+            <strong>Analytics:</strong>
+            Aggregated, anonymized data is retained indefinitely for trend
+            analysis
           </li>
           <li>
-            <strong>Commission communications:</strong> Retained for business records
-            and to provide ongoing support
+            <strong>Commission communications:</strong>
+            Retained for business records and to provide ongoing support
           </li>
           <li>
-            <strong>Project files:</strong> Retained for a reasonable period after
-            project completion in case of follow-up orders, then deleted
+            <strong>Project files:</strong>
+            Retained for a reasonable period after project completion in case of
+            follow-up orders, then deleted
           </li>
         </ul>
       </section>
@@ -252,67 +254,66 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  function initAnalyticsToggle() {
-    const toggle = document.getElementById(
-      'analytics-toggle',
-    ) as HTMLButtonElement;
-    const status = document.getElementById('analytics-status') as HTMLElement;
+function initAnalyticsToggle() {
+  const toggle = document.getElementById(
+    'analytics-toggle',
+  ) as HTMLButtonElement;
+  const status = document.getElementById('analytics-status') as HTMLElement;
 
-    if (!toggle || !status) return;
+  if (!toggle || !status) return;
 
-    const STORAGE_KEY = 'analytics-consent';
-    const UMAMI_DISABLED_KEY = 'umami.disabled';
+  const STORAGE_KEY = 'analytics-consent';
+  const UMAMI_DISABLED_KEY = 'umami.disabled';
 
-    function getConsent(): boolean {
-      // Check Umami's native disable flag first
-      const umamiDisabled = localStorage.getItem(UMAMI_DISABLED_KEY);
-      if (umamiDisabled === '1') return false;
+  function getConsent(): boolean {
+    // Check Umami's native disable flag first
+    const umamiDisabled = localStorage.getItem(UMAMI_DISABLED_KEY);
+    if (umamiDisabled === '1') return false;
 
-      const stored = localStorage.getItem(STORAGE_KEY);
-      // Default to true (opted in) if no preference stored
-      return stored === null ? true : stored === 'true';
-    }
-
-    function setConsent(enabled: boolean) {
-      localStorage.setItem(STORAGE_KEY, String(enabled));
-
-      // Sync with Umami's native disable flag
-      if (!enabled) {
-        localStorage.setItem(UMAMI_DISABLED_KEY, '1');
-      } else {
-        localStorage.removeItem(UMAMI_DISABLED_KEY);
-      }
-
-      updateUI(enabled);
-
-      // Dispatch event for the analytics script to respond to
-      window.dispatchEvent(
-        new CustomEvent('analytics-consent-change', {
-          detail: { enabled },
-        }),
-      );
-    }
-
-    function updateUI(enabled: boolean) {
-      toggle.textContent = enabled ? 'Opt Out' : 'Opt In';
-      toggle.dataset.enabled = String(enabled);
-      status.textContent =
-        enabled ?
-          'Analytics are currently enabled'
-        : 'Analytics are currently disabled';
-    }
-
-    // Initialize
-    const currentConsent = getConsent();
-    updateUI(currentConsent);
-
-    // Handle click
-    toggle.addEventListener('click', () => {
-      const currentlyEnabled = toggle.dataset.enabled === 'true';
-      setConsent(!currentlyEnabled);
-    });
+    const stored = localStorage.getItem(STORAGE_KEY);
+    // Default to true (opted in) if no preference stored
+    return stored === null ? true : stored === 'true';
   }
 
-  initAnalyticsToggle();
-  document.addEventListener('astro:after-swap', initAnalyticsToggle);
+  function setConsent(enabled: boolean) {
+    localStorage.setItem(STORAGE_KEY, String(enabled));
+
+    // Sync with Umami's native disable flag
+    if (!enabled) {
+      localStorage.setItem(UMAMI_DISABLED_KEY, '1');
+    } else {
+      localStorage.removeItem(UMAMI_DISABLED_KEY);
+    }
+
+    updateUI(enabled);
+
+    // Dispatch event for the analytics script to respond to
+    window.dispatchEvent(
+      new CustomEvent('analytics-consent-change', {
+        detail: { enabled },
+      }),
+    );
+  }
+
+  function updateUI(enabled: boolean) {
+    toggle.textContent = enabled ? 'Opt Out' : 'Opt In';
+    toggle.dataset.enabled = String(enabled);
+    status.textContent = enabled
+      ? 'Analytics are currently enabled'
+      : 'Analytics are currently disabled';
+  }
+
+  // Initialize
+  const currentConsent = getConsent();
+  updateUI(currentConsent);
+
+  // Handle click
+  toggle.addEventListener('click', () => {
+    const currentlyEnabled = toggle.dataset.enabled === 'true';
+    setConsent(!currentlyEnabled);
+  });
+}
+
+initAnalyticsToggle();
+document.addEventListener('astro:after-swap', initAnalyticsToggle);
 </script>

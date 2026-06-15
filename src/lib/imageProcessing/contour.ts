@@ -33,10 +33,10 @@ export function extractContours(
 
       if (binary[idx] === 1) {
         const hasWhiteNeighbor =
-          binary[idx - 1] === 0
-          || binary[idx + 1] === 0
-          || binary[idx - width] === 0
-          || binary[idx + width] === 0;
+          binary[idx - 1] === 0 ||
+          binary[idx + 1] === 0 ||
+          binary[idx - width] === 0 ||
+          binary[idx + width] === 0;
 
         if (hasWhiteNeighbor) {
           const pixelIdx = idx * 4;
@@ -82,9 +82,9 @@ export function contourToSVG(
     const radius = Math.min(50, Math.abs(Math.trunc(offsetPx)));
     if (radius > 0) {
       const morphed =
-        offsetPx > 0 ?
-          dilateBinary(binary, width, height, radius)
-        : erodeBinary(binary, width, height, radius);
+        offsetPx > 0
+          ? dilateBinary(binary, width, height, radius)
+          : erodeBinary(binary, width, height, radius);
       binary.set(morphed);
     }
   }
@@ -427,8 +427,8 @@ function perpendicularDistance(
   }
 
   const t =
-    ((point.x - lineStart.x) * dx + (point.y - lineStart.y) * dy)
-    / (dx * dx + dy * dy);
+    ((point.x - lineStart.x) * dx + (point.y - lineStart.y) * dy) /
+    (dx * dx + dy * dy);
   const nearestX = lineStart.x + t * dx;
   const nearestY = lineStart.y + t * dy;
 
@@ -560,20 +560,20 @@ export function cannyEdgeDetection(
       const idx = y * width + x;
 
       const gx =
-        -blurred[(y - 1) * width + (x - 1)]!
-        + blurred[(y - 1) * width + (x + 1)]!
-        + -2 * blurred[y * width + (x - 1)]!
-        + 2 * blurred[y * width + (x + 1)]!
-        + -blurred[(y + 1) * width + (x - 1)]!
-        + blurred[(y + 1) * width + (x + 1)]!;
+        -blurred[(y - 1) * width + (x - 1)]! +
+        blurred[(y - 1) * width + (x + 1)]! +
+        -2 * blurred[y * width + (x - 1)]! +
+        2 * blurred[y * width + (x + 1)]! +
+        -blurred[(y + 1) * width + (x - 1)]! +
+        blurred[(y + 1) * width + (x + 1)]!;
 
       const gy =
-        -blurred[(y - 1) * width + (x - 1)]!
-        - 2 * blurred[(y - 1) * width + x]!
-        - blurred[(y - 1) * width + (x + 1)]!
-        + blurred[(y + 1) * width + (x - 1)]!
-        + 2 * blurred[(y + 1) * width + x]!
-        + blurred[(y + 1) * width + (x + 1)]!;
+        -blurred[(y - 1) * width + (x - 1)]! -
+        2 * blurred[(y - 1) * width + x]! -
+        blurred[(y - 1) * width + (x + 1)]! +
+        blurred[(y + 1) * width + (x - 1)]! +
+        2 * blurred[(y + 1) * width + x]! +
+        blurred[(y + 1) * width + (x + 1)]!;
 
       magnitude[idx]! = Math.sqrt(gx * gx + gy * gy);
       direction[idx]! = Math.atan2(gy, gx);

@@ -1,19 +1,27 @@
 // @ts-check
 import sitemap from '@astrojs/sitemap';
+import svelte from '@astrojs/svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
-
-import svelte from '@astrojs/svelte';
 
 // https://astro.build/config
 export default defineConfig({
   output: 'static',
   site: 'https://ditherandetch.ca',
-  trailingSlash: 'never',
+  trailingSlash: 'always',
   build: {
-    format: 'file',
+    format: 'directory',
   },
-  integrations: [sitemap(), svelte()],
+  integrations: [
+    sitemap({
+      filter: page =>
+        !page.endsWith('/404/') &&
+        !page.endsWith('/429/') &&
+        !page.endsWith('/500/') &&
+        !page.endsWith('/503/'),
+    }),
+    svelte(),
+  ],
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {

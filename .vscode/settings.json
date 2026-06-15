@@ -27,42 +27,9 @@
     "unsharp"
   ],
 
-  // ESLint integration (2026 enhanced)
-  "eslint.enable": true,
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact",
-    "astro",
-    "svelte"
-  ],
-  "eslint.run": "onType",
-  "eslint.codeAction.showDisableComment": true,
-  "eslint.codeAction.showFixAll": true,
-  "eslint.format.enable": true,
-  "eslint.useFlatConfig": true,
-
-  // Prettier integration (2026 enhanced)
-  "prettier.enable": true,
-  "prettier.configPath": "./prettier.config.ts",
-  "prettier.documentSelectors": [
-    "**/*.astro",
-    "**/*.css",
-    "**/*.html",
-    "**/*.js",
-    "**/*.json",
-    "**/*.jsx",
-    "**/*.md",
-    "**/*.mjs",
-    "**/*.svelte",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-  "editor.formatOnPaste": true,
-  "prettier.experimentalTernaries": true,
+  // Biome integration
+  "biome.enabled": true,
+  "editor.defaultFormatter": "biomejs.biome",
 
   // Stylelint integration (2026 enhanced)
   "stylelint.enable": true,
@@ -128,10 +95,10 @@
     "sound": "on"
   },
 
-  // Linting on save (2026 enhanced)
+  // Linting on save
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "explicit",
+    "source.fixAll.biome": "explicit",
+    "source.organizeImports.biome": "explicit",
     "source.fixAll.stylelint": "explicit",
     "source.fixAll.markdownlint": "explicit"
   },

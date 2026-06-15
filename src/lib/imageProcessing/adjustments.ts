@@ -91,7 +91,7 @@ export function adjustGamma(
   const lookupTable = new Uint8Array(256);
 
   for (let i = 0; i < 256; i++) {
-    lookupTable[i] = clamp(Math.pow(i / 255, gammaCorrection) * 255);
+    lookupTable[i] = clamp((i / 255) ** gammaCorrection * 255);
   }
 
   for (let i = 0; i < data.length; i += 4) {

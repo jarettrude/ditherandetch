@@ -1,7 +1,7 @@
 ---
-import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import type { ImageMetadata } from 'astro';
 import Icon from '../components/global/Icon.astro';
 import Layout from '../layouts/Layout.astro';
 
@@ -38,8 +38,8 @@ featuredWithImages.sort((a, b) => {
 
   const sizeOrder = { large: 0, medium: 1, small: 2 };
   return (
-    sizeOrder[a.size as keyof typeof sizeOrder]
-    - sizeOrder[b.size as keyof typeof sizeOrder]
+    sizeOrder[a.size as keyof typeof sizeOrder] -
+    sizeOrder[b.size as keyof typeof sizeOrder]
   );
 });
 
@@ -88,14 +88,14 @@ function getImageWidth(size: string): number {
         </p>
         <div class="mt-10 flex flex-wrap gap-4">
           <a
-            href="/gallery"
+            href="/gallery/"
             class="btn btn-primary btn-lg"
             aria-label="View our work gallery"
           >
             view our work
           </a>
           <a
-            href="/contact"
+            href="/contact/"
             class="btn btn-secondary btn-lg"
             aria-label="Get in touch with us"
           >
@@ -107,8 +107,7 @@ function getImageWidth(size: string): number {
   </section>
 
   <!-- Featured Work Bento Grid -->
-  {
-    featuredWithImages.length > 0 && (
+  {featuredWithImages.length > 0 && (
       <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div class="mx-auto max-w-6xl">
           <div class="mb-10 flex items-end justify-between">
@@ -121,7 +120,7 @@ function getImageWidth(size: string): number {
               </p>
             </div>
             <a
-              href="/gallery"
+              href="/gallery/"
               class="hidden text-sm font-medium text-accent hover:text-accent-hover sm:inline-flex sm:items-center sm:gap-1"
               aria-label="View all work in the gallery"
             >
@@ -167,7 +166,7 @@ function getImageWidth(size: string): number {
 
           <div class="mt-8 text-center">
             <a
-              href="/gallery"
+              href="/gallery/"
               class="inline-flex items-center gap-1 text-sm font-medium text-accent hover:text-accent-hover sm:hidden"
               aria-label="View all work in the gallery"
             >
@@ -177,8 +176,7 @@ function getImageWidth(size: string): number {
           </div>
         </div>
       </section>
-    )
-  }
+    )}
 
   <!-- The Craft Section -->
   <section class="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
@@ -189,12 +187,14 @@ function getImageWidth(size: string): number {
         </h2>
         <div class="mt-8 space-y-6 text-lg text-ink-muted leading-relaxed">
           <p>
-            <strong class="text-ink font-display">Dither</strong> — the halftone magic
-            that turns photos into thousands of tiny dots, each one placed with intention.
+            <strong class="text-ink font-display">Dither</strong>
+            — the halftone magic that turns photos into thousands of tiny dots,
+            each one placed with intention.
           </p>
           <p>
-            <strong class="text-ink font-display">Etch</strong> — the crisp, unforgiving
-            lines that demand precision. No room for error, no second chances.
+            <strong class="text-ink font-display">Etch</strong>
+            — the crisp, unforgiving lines that demand precision. No room for
+            error, no second chances.
           </p>
           <p class="text-ink">
             Together, they're the yin and yang of laser craft. The organic and

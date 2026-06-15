@@ -11,8 +11,8 @@
 import {
   AutoModel,
   AutoProcessor,
-  RawImage,
   env,
+  RawImage,
 } from '@huggingface/transformers';
 
 env.allowLocalModels = false;
@@ -31,9 +31,8 @@ let processor: any = null;
  */
 async function getModel(onProgress?: (progress: number) => void) {
   if (!model || !processor) {
-    const progressCallback =
-      onProgress ?
-        (data: { progress?: number }) => {
+    const progressCallback = onProgress
+      ? (data: { progress?: number }) => {
           if (typeof data.progress === 'number') {
             onProgress(data.progress);
           }
