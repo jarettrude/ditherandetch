@@ -1,0 +1,27 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ImageStudio from '../../components/tools/ImageStudio.svelte';
+---
+
+<Layout
+  title="Studio | Dither & Etch"
+  description="Free, client-side image editing suite for laser engraving preparation. Adjust, background removal, mask, contour, and dither — your images never leave your browser."
+>
+  <div class="px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+    <div class="mx-auto max-w-6xl">
+      <header class="mb-8">
+        <h1 class="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+          Studio
+        </h1>
+        <p class="mt-2 text-ink-muted">
+          All-in-one image preparation for laser engraving.
+          <strong class="text-ink"
+            >Your images never leave your browser.</strong
+          >
+        </p>
+      </header>
+
+      <ImageStudio client:only="svelte" />
+    </div>
+  </div>
+</Layout>

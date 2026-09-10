@@ -1,36 +1,39 @@
 /**
  * Background Removal Module
  *
- * Uses Transformers.js with RMBG-1.4 for high-quality client-side background removal.
- * RMBG-1.4 is specifically designed for background removal and handles fine details
- * like fur, hair, and complex edges much better than general segmentation models.
+ * Uses Transformers.js with BiRefNet_lite (MIT license) for client-side background removal.
+ * BiRefNet uses bilateral reference for high-resolution dichotomous image segmentation,
+ * providing clean subject/background separation suitable for laser engraving prep.
  *
  * All processing happens in the browser using WASM/WebGPU.
  */
 
-import {
-  AutoModel,
-  AutoProcessor,
-  env,
-  RawImage,
-} from '@huggingface/transformers';
-
-env.allowLocalModels = false;
-
 export interface BackgroundRemovalOptions {
-  model?: 'rmbg' | 'isnet';
   onProgress?: (progress: number) => void;
 }
 
+let transformersModule: typeof import('@huggingface/transformers') | null =
+  null;
 let model: any = null;
-
 let processor: any = null;
 
+async function getTransformers() {
+  if (!transformersModule) {
+    transformersModule = await import('@huggingface/transformers');
+    transformersModule.env.allowLocalModels = false;
+  }
+  return transformersModule;
+}
+
 /**
- * Get or create the model and processor
+ * Get or create the model, processor, and RawImage utility
  */
 async function getModel(onProgress?: (progress: number) => void) {
+  const { AutoModel, AutoProcessor, RawImage } = await getTransformers();
+
   if (!model || !processor) {
+    const modelId = 'studioludens/birefnet-lite-512';
+
     const progressCallback = onProgress
       ? (data: { progress?: number }) => {
           if (typeof data.progress === 'number') {
@@ -39,29 +42,33 @@ async function getModel(onProgress?: (progress: number) => void) {
         }
       : undefined;
 
-    model = await AutoModel.from_pretrained('briaai/RMBG-1.4', {
+    // Use WASM backend directly for robust compatibility across Safari, Chrome, and Firefox
+    model = await AutoModel.from_pretrained(modelId, {
+      device: 'wasm',
       // @ts-expect-error - progress_callback exists but types are incomplete
       progress_callback: progressCallback,
     });
 
-    processor = await AutoProcessor.from_pretrained('briaai/RMBG-1.4', {
+    processor = await AutoProcessor.from_pretrained(modelId, {
       progress_callback: progressCallback,
     });
   }
-  return { model, processor };
+  return { model, processor, RawImage };
 }
 
 /**
- * Remove background from an image using RMBG-1.4
+ * Remove background from an image using BiRefNet_lite
  * Returns a blob with transparent background
  */
 export async function removeImageBackground(
   imageSource: Blob | string,
   options: BackgroundRemovalOptions = {},
 ): Promise<Blob> {
-  const { model: segModel, processor: segProcessor } = await getModel(
-    options.onProgress,
-  );
+  const {
+    model: segModel,
+    processor: segProcessor,
+    RawImage,
+  } = await getModel(options.onProgress);
 
   let imageUrl: string;
   if (imageSource instanceof Blob) {
@@ -95,10 +102,10 @@ export async function removeImageBackground(
   const image = await RawImage.fromURL(imageUrl);
   const { pixel_values } = await segProcessor(image);
 
-  const { output } = await segModel({ input: pixel_values });
+  const { output_image } = await segModel({ input_image: pixel_values });
 
   const maskRaw = await RawImage.fromTensor(
-    output[0].mul(255).to('uint8'),
+    output_image[0].sigmoid().mul(255).to('uint8'),
   ).resize(htmlImage.width, htmlImage.height);
 
   const canvas = document.createElement('canvas');
@@ -134,9 +141,11 @@ export async function getBackgroundMask(
   imageSource: Blob | string,
   options: BackgroundRemovalOptions = {},
 ): Promise<Blob> {
-  const { model: segModel, processor: segProcessor } = await getModel(
-    options.onProgress,
-  );
+  const {
+    model: segModel,
+    processor: segProcessor,
+    RawImage,
+  } = await getModel(options.onProgress);
 
   let imageUrl: string;
   if (imageSource instanceof Blob) {
@@ -157,10 +166,10 @@ export async function getBackgroundMask(
 
   const image = await RawImage.fromURL(imageUrl);
   const { pixel_values } = await segProcessor(image);
-  const { output } = await segModel({ input: pixel_values });
+  const { output_image } = await segModel({ input_image: pixel_values });
 
   const maskData = await RawImage.fromTensor(
-    output[0].mul(255).to('uint8'),
+    output_image[0].sigmoid().mul(255).to('uint8'),
   ).resize(htmlImage.width, htmlImage.height);
 
   const canvas = document.createElement('canvas');

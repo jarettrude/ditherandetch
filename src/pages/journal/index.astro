@@ -6,6 +6,30 @@ const allPosts = await getCollection('journal', ({ data }) => !data.draft);
 const posts = allPosts.sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
+
+// Calculate top 7 tags by frequency
+const tagCounts = new Map<string, number>();
+posts.forEach(post => {
+  const postTags =
+    post.data.tags.length > 0
+      ? post.data.tags
+      : post.data.category
+        ? [post.data.category]
+        : [];
+
+  postTags.forEach(tag => {
+    const t = tag.trim().toLowerCase();
+    if (t) {
+      tagCounts.set(t, (tagCounts.get(t) || 0) + 1);
+    }
+  });
+});
+
+// Sort tags by frequency descending, take top 7
+const topTags = Array.from(tagCounts.entries())
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 7)
+  .map(([tag]) => tag);
 ---
 
 <Layout
@@ -25,42 +49,76 @@ const posts = allPosts.sort(
         </p>
       </header>
 
+      {/* Filter Bar (Top 7 tags when multiple exist) */}
+      {topTags.length > 1 && (
+        <div class="mb-8 flex flex-wrap items-center gap-2" id="tag-filters">
+          <button
+            type="button"
+            data-tag="all"
+            class="journal-filter-btn rounded-sm border border-accent bg-accent/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-accent transition-all"
+          >
+            All
+          </button>
+          {topTags.map(tag => (
+            <button
+              type="button"
+              data-tag={tag}
+              class="journal-filter-btn rounded-sm border border-border bg-surface-raised px-3 py-1 text-xs font-medium uppercase tracking-wider text-ink-muted transition-all hover:border-accent/40 hover:text-ink"
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
       {posts.length > 0 ?
-          <div class="grid gap-8">
-            {posts.map(post => (
-              <article class="group">
-                <a
-                  href={`/journal/${post.id.replace('.md', '').replace('.mdx', '')}/`}
-                  class="block rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40 sm:p-8"
+          <div class="grid gap-8" id="journal-posts">
+            {posts.map(post => {
+              const postTags = post.data.tags.length > 0
+                ? post.data.tags
+                : post.data.category ? [post.data.category] : [];
+              const tagsJson = JSON.stringify(postTags.map(t => t.trim().toLowerCase()));
+
+              return (
+                <article
+                  class="journal-item group"
+                  data-tags={tagsJson}
                 >
-                  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="flex-1">
-                      <p class="text-sm font-medium uppercase tracking-wider text-accent">
-                        {post.data.category}
-                      </p>
-                      <h2 class="mt-2 font-display text-2xl font-bold tracking-tight group-hover:text-accent sm:text-3xl">
-                        {post.data.title}
-                      </h2>
-                      {post.data.excerpt && (
-                        <p class="mt-3 text-ink-muted leading-relaxed">
-                          {post.data.excerpt}
-                        </p>
-                      )}
+                  <a
+                    href={`/journal/${post.id.replace('.md', '').replace('.mdx', '')}/`}
+                    class="block rounded-sm border border-border bg-surface-raised p-6 transition-all hover:border-accent/40 sm:p-8"
+                  >
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div class="flex-1">
+                        {postTags.length > 0 && (
+                          <p class="text-sm font-medium uppercase tracking-wider text-accent">
+                            {postTags.join(' • ')}
+                          </p>
+                        )}
+                        <h2 class="mt-2 font-display text-2xl font-bold tracking-tight group-hover:text-accent sm:text-3xl">
+                          {post.data.title}
+                        </h2>
+                        {post.data.excerpt && (
+                          <p class="mt-3 text-ink-muted leading-relaxed">
+                            {post.data.excerpt}
+                          </p>
+                        )}
+                      </div>
+                      <time
+                        datetime={post.data.date.toISOString()}
+                        class="shrink-0 text-sm text-ink-muted"
+                      >
+                        {post.data.date.toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </time>
                     </div>
-                    <time
-                      datetime={post.data.date.toISOString()}
-                      class="shrink-0 text-sm text-ink-muted"
-                    >
-                      {post.data.date.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                      })}
-                    </time>
-                  </div>
-                </a>
-              </article>
-            ))}
+                  </a>
+                </article>
+              );
+            })}
           </div>
         : <div class="rounded-sm border border-border bg-surface-raised p-8 text-center sm:p-12">
             <h2 class="font-display text-2xl font-bold">Coming Soon</h2>
@@ -77,3 +135,45 @@ const posts = allPosts.sort(
     </div>
   </div>
 </Layout>
+
+<script>
+function initJournalFilters() {
+  const buttons = document.querySelectorAll<HTMLButtonElement>(
+    '.journal-filter-btn',
+  );
+  const items = document.querySelectorAll<HTMLElement>('.journal-item');
+  if (!buttons.length || !items.length) return;
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const selected = btn.dataset.tag || 'all';
+
+      // Update button states
+      buttons.forEach(b => {
+        const isActive = b.dataset.tag === selected;
+        b.classList.toggle('border-accent', isActive);
+        b.classList.toggle('bg-accent/10', isActive);
+        b.classList.toggle('text-accent', isActive);
+        b.classList.toggle('border-border', !isActive);
+        b.classList.toggle('bg-surface-raised', !isActive);
+        b.classList.toggle('text-ink-muted', !isActive);
+      });
+
+      // Filter items
+      items.forEach(item => {
+        const rawTags = item.dataset.tags || '[]';
+        try {
+          const itemTags: string[] = JSON.parse(rawTags);
+          const match = selected === 'all' || itemTags.includes(selected);
+          item.style.display = match ? '' : 'none';
+        } catch {
+          item.style.display = '';
+        }
+      });
+    });
+  });
+}
+
+initJournalFilters();
+document.addEventListener('astro:after-swap', initJournalFilters);
+</script>

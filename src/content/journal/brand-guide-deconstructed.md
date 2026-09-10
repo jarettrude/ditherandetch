@@ -1,7 +1,10 @@
 ---
 title: 'Deconstructing the Brand'
 date: 2026-01-27
-category: brand
+tags:
+  - brand
+  - design
+  - typography
 excerpt:
   'A complete breakdown of the Dither & Etch visual identity — typography, color tokens, components,
   and usage guidelines.'

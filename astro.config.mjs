@@ -12,6 +12,14 @@ export default defineConfig({
   build: {
     format: 'directory',
   },
+  redirects: {
+    '/tools/': '/studio/',
+    '/tools/dither/': '/studio/',
+    '/tools/background/': '/studio/',
+    '/tools/masking/': '/studio/',
+    '/tools/contour/': '/studio/',
+    '/tools/editor/': '/studio/',
+  },
   integrations: [
     sitemap({
       filter: page =>
@@ -25,20 +33,11 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      exclude: [
-        '@huggingface/transformers',
-        'onnxruntime-web',
-        'sharp',
-        'upscaler',
-        '@upscalerjs/esrgan-slim',
-        '@tensorflow/tfjs',
-      ],
-    },
-    ssr: {
-      noExternal: ['upscaler', '@upscalerjs/esrgan-slim'],
+      exclude: ['@huggingface/transformers', 'onnxruntime-web'],
     },
     build: {
       target: 'esnext',
+      chunkSizeWarningLimit: 1024,
     },
     esbuild: {
       supported: {

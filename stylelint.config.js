@@ -61,6 +61,12 @@ export default {
         ],
       },
     ],
+    'at-rule-prelude-no-invalid': [
+      true,
+      {
+        ignoreAtRules: ['apply'],
+      },
+    ],
     'property-no-unknown': [
       true,
       {

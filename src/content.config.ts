@@ -20,9 +20,8 @@ const journal = defineCollection({
   schema: z.object({
     title: z.string(),
     date: z.date(),
-    category: z
-      .enum(['process', 'experiments', 'commissions', 'brand'])
-      .default('process'),
+    tags: z.array(z.string()).default([]),
+    category: z.string().optional(),
     excerpt: z.string().optional(),
     cover: z.string().optional(),
     draft: z.boolean().default(false),
