@@ -39,10 +39,5 @@ export default defineConfig({
       target: 'esnext',
       chunkSizeWarningLimit: 1024,
     },
-    esbuild: {
-      supported: {
-        'top-level-await': true,
-      },
-    },
   },
 });

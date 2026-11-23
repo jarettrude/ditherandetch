@@ -15,7 +15,13 @@ pnpm-debug.log*
 
 # environment variables
 .env
-.env.production
+.env.*
+!.env.example
+
+# AI agent local settings (may contain permission allow-lists or secrets)
+.claude/settings.local.json
+.cursor/mcp.json
+mcp.json
 
 # macOS-specific files
 .DS_Store
